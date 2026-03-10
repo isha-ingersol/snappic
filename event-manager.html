@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>NAME - Event Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#F4F3EF;--ink:#141412;--mu:#8A8A82;
+  --bl:#2246D4;--bll:#EEF1FD;
+  --gr:#1A7A42;--grl:#E8F5EE;
+  --re:#C41C1C;--rel:#FDEAEA;
+  --am:#B45309;--aml:#FDF5E6;
+  --pu:#6D28D9;--pul:#F3EFFD;
+  --or:#C2410C;--orl:#FDF0EB;
+  --bd:#E2E1DC;--ca:#FFF;
+  --dk:#0C0E1A;--dk2:#141828;
+  --mn:'DM Mono',monospace;--sf:'Sora',sans-serif;
+}
+html,body{height:100%;}
+body{font-family:var(--sf);color:var(--ink);background:var(--dk);display:flex;flex-direction:column;min-height:100svh;}
+
+/* SHELL */
+.shell{background:#080A14;border-bottom:1px solid #1A1F35;padding:0 14px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:200;height:42px;flex-shrink:0;}
+.s-logo{font-family:var(--mn);font-size:11px;font-weight:500;color:#93C5FD;letter-spacing:.14em;flex-shrink:0;}
+
+/* VIEW */
+.view{display:flex;flex-direction:column;height:calc(100svh - 42px);}
+
+/* SCREEN NAV */
+.snav{background:#080A14;border-bottom:1px solid #1A1F35;padding:6px 12px;display:flex;gap:2px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;flex-shrink:0;}
+.snav::-webkit-scrollbar{display:none;}
+.sn{font-family:var(--mn);font-size:8px;letter-spacing:.04em;padding:4px 8px;border-radius:4px;cursor:pointer;color:#475569;border:none;background:transparent;text-transform:uppercase;white-space:nowrap;transition:all .12s;}
+.sn:hover{color:#94A3B8;background:#141828;}
+.sn.on{background:#192D5A;color:#93C5FD;}
+
+/* CANVASES */
+.tcanvas{flex:1;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:8px;background:#060810;}
+
+/* IPAD */
+.ipad{background:#1A1C28;border-radius:clamp(18px,4vw,36px);padding:clamp(6px,1.5vw,12px) clamp(5px,1.2vw,10px) clamp(8px,2vw,16px);box-shadow:0 0 0 1.5px #2A2D45,0 0 0 3px #12141E,0 28px 80px rgba(0,0,0,.95);position:relative;display:flex;flex-direction:column;width:min(390px,95vw,76.63svh);aspect-ratio:0.7663;flex-shrink:0;}
+.ipad-cam{position:absolute;top:6px;left:50%;transform:translateX(-50%);width:6px;height:6px;border-radius:50%;background:#2A2D45;}
+.ipad-btn-r{position:absolute;right:-3px;top:110px;width:3px;height:44px;border-radius:0 3px 3px 0;background:#2A2D45;}
+.ipad-btn-l1{position:absolute;left:-3px;top:88px;width:3px;height:28px;border-radius:3px 0 0 3px;background:#2A2D45;}
+.ipad-btn-l2{position:absolute;left:-3px;top:126px;width:3px;height:44px;border-radius:3px 0 0 3px;background:#2A2D45;}
+.ipad-scr{flex:1;background:#0D0F1E;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;margin-top:4px;min-height:0;position:relative;}
+
+/* ATOMS */
+.wc{padding:20px;}
+.h2{font-size:18px;font-weight:700;letter-spacing:-.02em;}
+.h3{font-size:13px;font-weight:600;}
+.mu{font-size:11px;color:var(--mu);line-height:1.5;}
+.lbl{font-family:var(--mn);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mu);margin-bottom:4px;}
+.inp{width:100%;background:var(--bg);border:1.5px solid var(--bd);border-radius:7px;padding:9px 12px;font-size:11px;color:var(--ink);font-family:var(--sf);outline:none;}
+.inp::placeholder{color:var(--mu);}
+.card{background:var(--bg);border:1.5px solid var(--bd);border-radius:10px;padding:14px;}
+.hr{height:1px;background:var(--bd);margin:12px 0;}
+
+/* PILLS */
+.p{display:inline-flex;align-items:center;font-family:var(--mn);font-size:8px;padding:2px 7px;border-radius:20px;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;}
+.pb{background:var(--bll);color:var(--bl);border:1px solid #A5B4FC;}
+.pg{background:var(--grl);color:var(--gr);border:1px solid #86EFAC;}
+.pr{background:var(--rel);color:var(--re);border:1px solid #FCA5A5;}
+.pa{background:var(--aml);color:var(--am);border:1px solid #FCD34D;}
+.pp{background:var(--pul);color:var(--pu);border:1px solid #C4B5FD;}
+.pgr{background:#F1F5F9;color:var(--mu);border:1px solid var(--bd);}
+
+/* BTNS */
+.btn{font-size:11px;font-weight:600;padding:9px 16px;border-radius:7px;background:var(--bl);color:#fff;cursor:pointer;transition:opacity .15s;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
+.btn:hover{opacity:.87;}
+.bgh{background:transparent;border:1.5px solid var(--bd);color:var(--ink);}
+.bgr{background:var(--gr);}
+.bfu{width:100%;}
+
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+/* DEVICE SELECT ROW */
+.dev-row{padding:10px 0;border-bottom:1px solid var(--bd);}
+.dev-row:last-child{border-bottom:none;}
+.dev-top{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.dev-icon{font-size:16px;flex-shrink:0;width:22px;text-align:center;}
+.dev-info{flex:1;}
+.dev-lbl{font-size:11px;font-weight:600;}
+.dev-sub{font-size:9px;color:var(--mu);margin-top:1px;}
+.dev-select-wrap{position:relative;display:flex;gap:6px;align-items:center;}
+.dev-select{width:100%;background:#fff;border:1.5px solid var(--bd);border-radius:7px;padding:7px 28px 7px 10px;font-size:10px;color:var(--ink);font-family:var(--sf);outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;}
+.dev-select:focus{border-color:var(--bl);}
+.dev-select-arrow{position:absolute;right:9px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--mu);}
+.find-btn{flex-shrink:0;background:var(--bll);border:1.5px solid #A5B4FC;color:var(--bl);border-radius:7px;padding:6px 9px;font-size:9px;font-family:var(--mn);font-weight:500;cursor:pointer;white-space:nowrap;transition:all .15s;letter-spacing:.03em;}
+.find-btn:hover{background:#D8E2FF;}
+
+/* FIND SCANNING ANIMATION */
+@keyframes pulse-ring{0%{transform:scale(.8);opacity:1;}80%,100%{transform:scale(1.4);opacity:0;}}
+@keyframes spin-slow{from{transform:rotate(0deg);}to{transform:rotate(360deg);}  }
+
+/* GIF ANIMATIONS */
+@keyframes bf1{0%,14%{opacity:1;}16%,83%{opacity:0;}86%,98%{opacity:1;}100%{opacity:0;}}
+@keyframes bf2{0%,15%{opacity:0;}17%,31%{opacity:1;}33%,68%{opacity:0;}70%,84%{opacity:1;}86%,100%{opacity:0;}}
+@keyframes bf3{0%,32%{opacity:0;}34%,48%{opacity:1;}50%,53%{opacity:0;}55%,69%{opacity:1;}71%,100%{opacity:0;}}
+@keyframes bf4{0%,49%{opacity:0;}51%,64%{opacity:1;}66%,100%{opacity:0;}}
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+
+/* TOAST & MODAL */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:11px;font-family:var(--mn);padding:9px 16px;border-radius:8px;z-index:9999;opacity:0;transition:opacity .28s;pointer-events:none;white-space:nowrap;max-width:90vw;}
+.toast.on{opacity:1;}
+.mo{position:absolute;inset:0;background:rgba(0,0,0,.6);z-index:5000;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px);border-radius:24px;}
+.mo.hid{display:none;}
+.mb{background:#fff;border-radius:16px 16px 0 0;padding:16px;width:100%;max-height:75%;overflow-y:auto;position:relative;}
+.mc{position:absolute;top:12px;right:14px;font-size:20px;cursor:pointer;color:var(--mu);}
+
+/* BOTTOM NAV */
+.bot-nav{background:#fff;border-top:1.5px solid var(--bd);display:flex;flex-shrink:0;}
+.bot-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:6px 4px;}
+
+/* TOGGLE SWITCH */
+.sw{width:36px;height:20px;border-radius:10px;background:var(--bd);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
+.sw::after{content:'';position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;top:3px;left:3px;transition:transform .2s;}
+.sw.on{background:var(--bl);}
+.sw.on::after{transform:translateX(16px);}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="s-logo">NAME · EVENT MANAGER</div>
+</div>
+
+<div class="view on">
+  <div class="tcanvas" id="ea-c"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── GLOBALS ── */
+const FC=['#1A237E','#991B1B','#92400E','#14532D'];
+const FL=['Midnight Blue','Crimson Red','Amber Gold','Forest Green'];
+
+/* ── DEVICE OPTIONS ── */
+const DEVICE_OPTIONS = {
+  camera: [
+    {val:'canon-r5', label:'Canon EOS R5 · USB'},
+    {val:'canon-r6', label:'Canon EOS R6 · USB'},
+    {val:'sony-a7iv', label:'Sony A7 IV · USB'},
+    {val:'nikon-z6', label:'Nikon Z6 III · USB'},
+    {val:'find', label:'Find Device…'},
+  ],
+  flash: [
+    {val:'godox-ad200', label:'Godox AD200 · Bluetooth'},
+    {val:'godox-v1', label:'Godox V1 · Bluetooth'},
+    {val:'profoto-b10', label:'Profoto B10 · Bluetooth'},
+    {val:'find', label:'Find Device…'},
+  ],
+  printer: [
+    {val:'dnp-ds620', label:'DNP DS620A · Wi-Fi'},
+    {val:'dnp-rx1', label:'DNP RX1HS · Wi-Fi'},
+    {val:'hiti-s420', label:'HiTi S420 · USB'},
+    {val:'find', label:'Find Device…'},
+  ],
+  wifi: [
+    {val:'venue-5g', label:'NAME-Venue-5G'},
+    {val:'venue-2g', label:'NAME-Venue-2G'},
+    {val:'hotspot', label:'Mobile Hotspot'},
+    {val:'find', label:'Find Device…'},
+  ],
+};
+
+const DEVICE_STATUS = {
+  'canon-r5':'pg', 'canon-r6':'pg', 'sony-a7iv':'pg', 'nikon-z6':'pg',
+  'godox-ad200':'pg', 'godox-v1':'pg', 'profoto-b10':'pg',
+  'dnp-ds620':'pr', 'dnp-rx1':'pg', 'hiti-s420':'pg',
+  'venue-5g':'pg', 'venue-2g':'pg', 'hotspot':'pa',
+};
+
+/* ── UTILS ── */
+const $=id=>document.getElementById(id);
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2300);}
+function openM(h,wide=false){const b=$('mb');b.className='mb'+(wide?' w':'');b.innerHTML=h;$('mo').classList.remove('hid');}
+function closeM(){$('mo').classList.add('hid');}
+function closeMbg(e){if(e.target===$('mo'))closeM();}
+function tog(el){el.classList.toggle('on');}
+
+function ipad(c){
+  return `<div class="ipad"><div class="ipad-cam"></div><div class="ipad-btn-r"></div><div class="ipad-btn-l1"></div><div class="ipad-btn-l2"></div><div class="ipad-scr">${c}<div class="mo hid" id="mo" onclick="closeMbg(event)"><div class="mb" id="mb" style="position:relative;"></div></div></div></div>`;
+}
+function stars(r=0,sz=12){
+  return `<div style="display:flex;gap:2px;">${[1,2,3,4,5].map(n=>`<svg width="${sz}" height="${sz}" viewBox="0 0 20 20" fill="${n<=r?'#F59E0B':'#D1D5DB'}"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>`).join('')}</div>`;
+}
+
+/* ── BOTTOM NAV - always rendered, active tab highlighted ── */
+function eaN(active){
+  const icons={
+    events:function(col){return svg24('<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" stroke="'+col+'" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 22V12h6v10" stroke="'+col+'" stroke-width="1.6"/>');},
+    history:function(col){return svg24('<circle cx="12" cy="12" r="9" stroke="'+col+'" stroke-width="1.6"/><path d="M12 7v5l3 3" stroke="'+col+'" stroke-width="1.6" stroke-linecap="round"/>');},
+    ea_profile:function(col){return svg24('<circle cx="12" cy="8" r="4" stroke="'+col+'" stroke-width="1.6"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="'+col+'" stroke-width="1.6" stroke-linecap="round"/>');}
+  };
+  var T=[['events','Events'],['history','History'],['ea_profile','Profile']];
+  return '<div class="bot-nav">'+T.map(function(tab){
+    var id=tab[0],lbl=tab[1];
+    var on=active===id,col=on?'var(--bl)':'var(--mu)',fw=on?'600':'400';
+    return '<div class="bot-nav-item" onclick="showEA(\''+id+'\',null)">'+icons[id](col)+'<span style="font-size:9px;font-family:var(--mn);color:'+col+';font-weight:'+fw+';">'+lbl+'</span></div>';
+  }).join('')+'</div>';
+}
+function svg24(inner){return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none">'+inner+'</svg>';}
+
+/* ── EVENT MANAGER ── */
+function showEA(s,btn){
+  document.querySelectorAll('.sn').forEach(b=>b.classList.remove('on'));
+  btn?.classList.add('on');renderEA(s);
+}
+function renderEA(s){
+  const c=$('ea-c');if(!c)return;
+  const m={login:eaLogin,ea_register:eaRegister,events:eaEvents,setup:eaSetup,history:eaHistory,ea_profile:eaProfile};
+  c.innerHTML=(m[s]||eaLogin)();
+}
+
+/* ── DEVICE SELECT HELPERS ── */
+function buildDeviceSelect(type, selectedVal, statusClass) {
+  const opts = DEVICE_OPTIONS[type];
+  const optHtml = opts.map(o =>
+    `<option value="${o.val}" ${o.val===selectedVal?'selected':''}>${o.label}</option>`
+  ).join('');
+  return `
+    <div class="dev-select-wrap">
+      <div style="position:relative;flex:1;">
+        <select class="dev-select" onchange="handleDeviceChange('${type}',this)">
+          ${optHtml}
+        </select>
+        <svg class="dev-select-arrow" width="12" height="12" viewBox="0 0 20 20" fill="none"><path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </div>`;
+}
+
+function handleDeviceChange(type, sel) {
+  if (sel.value === 'find') {
+    sel.value = sel.options[0].value;
+    openFindDevice(type);
+    return;
+  }
+  const status = DEVICE_STATUS[sel.value] || 'pa';
+  const statusEl = document.getElementById('status-' + type);
+  if (statusEl) {
+    statusEl.className = 'p ' + status;
+    statusEl.textContent = status === 'pg' ? 'Connected' : status === 'pr' ? 'Offline' : 'Connecting…';
+  }
+  toast('Device updated');
+}
+
+function openFindDevice(type) {
+  const typeLabel = {camera:'Camera',flash:'Flash / Lighting',printer:'Printer',wifi:'Wi-Fi Network'}[type]||type;
+  const protocols = {camera:['USB','Bluetooth'],flash:['Bluetooth','RF Wireless'],printer:['Wi-Fi','USB','Ethernet'],wifi:['Wi-Fi 5GHz','Wi-Fi 2.4GHz','Hotspot']}[type]||['Auto'];
+
+  openM(`<span class="mc" onclick="closeM()">×</span>
+<div style="font-size:15px;font-weight:700;margin-bottom:4px;">Find ${typeLabel}</div>
+<div style="font-size:11px;color:var(--mu);margin-bottom:16px;">Scan for nearby devices. Make sure the device is powered on and in pairing mode.</div>
+
+<div style="margin-bottom:14px;">
+  <div class="lbl" style="margin-bottom:6px;">Connection type</div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;">
+    ${protocols.map((p,i)=>`<div onclick="selectProtocol(this)" style="padding:5px 11px;border-radius:6px;font-size:10px;font-family:var(--mn);cursor:pointer;border:1.5px solid ${i===0?'var(--bl)':'var(--bd)'};background:${i===0?'var(--bll)':'transparent'};color:${i===0?'var(--bl)':'var(--mu)'};">${p}</div>`).join('')}
+  </div>
+</div>
+
+<div id="scan-area" style="background:var(--bg);border:1.5px solid var(--bd);border-radius:10px;padding:16px;text-align:center;margin-bottom:14px;">
+  <div id="scan-idle" style="display:block;">
+    <div style="font-size:28px;margin-bottom:8px;">📡</div>
+    <div style="font-size:11px;font-weight:600;margin-bottom:4px;">Ready to scan</div>
+    <div style="font-size:10px;color:var(--mu);">Tap the button below to search for nearby ${typeLabel.toLowerCase()} devices.</div>
+  </div>
+  <div id="scan-busy" style="display:none;">
+    <div style="position:relative;width:48px;height:48px;margin:0 auto 10px;">
+      <div style="position:absolute;inset:0;border-radius:50%;border:2px solid var(--bl);opacity:.3;animation:pulse-ring 1.4s ease-out infinite;"></div>
+      <div style="position:absolute;inset:6px;border-radius:50%;border:2px solid var(--bl);opacity:.5;animation:pulse-ring 1.4s .3s ease-out infinite;"></div>
+      <div style="position:absolute;inset:14px;border-radius:50%;background:var(--bl);"></div>
+    </div>
+    <div style="font-size:11px;font-weight:600;color:var(--bl);">Scanning…</div>
+    <div style="font-size:10px;color:var(--mu);margin-top:2px;">Looking for nearby devices</div>
+  </div>
+  <div id="scan-results" style="display:none;text-align:left;"></div>
+</div>
+
+<div class="btn bfu" style="border-radius:8px;padding:11px;" onclick="startScan('${type}','${typeLabel}')">Start Scan</div>
+`);
+}
+
+function selectProtocol(el){
+  el.closest('.mb').querySelectorAll('[onclick="selectProtocol(this)"]').forEach(e=>{
+    e.style.borderColor='var(--bd)';e.style.background='transparent';e.style.color='var(--mu)';
+  });
+  el.style.borderColor='var(--bl)';el.style.background='var(--bll)';el.style.color='var(--bl)';
+}
+
+const FAKE_DEVICES = {
+  camera:['Canon EOS R5 · USB','Sony A7 IV · USB','Nikon Z6 III · Bluetooth'],
+  flash:['Godox AD200 · Bluetooth (–62 dBm)','Profoto B10 · Bluetooth (–74 dBm)'],
+  printer:['DNP DS620A · Wi-Fi (192.168.1.42)','HiTi S420 · USB'],
+  wifi:['NAME-Venue-5G (–45 dBm)','NAME-Venue-2G (–58 dBm)','VenueGuest (–71 dBm)'],
+};
+
+function startScan(type, typeLabel){
+  document.getElementById('scan-idle').style.display='none';
+  document.getElementById('scan-busy').style.display='block';
+  document.getElementById('scan-results').style.display='none';
+  setTimeout(()=>{
+    document.getElementById('scan-busy').style.display='none';
+    const found = FAKE_DEVICES[type]||[];
+    const res = document.getElementById('scan-results');
+    if(!found.length){res.innerHTML='<div style="font-size:11px;color:var(--mu);text-align:center;padding:8px 0;">No devices found. Check power and pairing mode.</div>';}
+    else{
+      res.innerHTML=`<div style="font-size:9px;font-family:var(--mn);color:var(--mu);margin-bottom:8px;letter-spacing:.08em;">FOUND ${found.length} DEVICE${found.length>1?'S':''}</div>`+
+      found.map(d=>`<div onclick="connectDevice(this,'${d}','${type}')" style="display:flex;align-items:center;gap:10px;padding:9px 10px;border:1.5px solid var(--bd);border-radius:8px;margin-bottom:6px;cursor:pointer;background:#fff;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--bl)'" onmouseout="this.style.borderColor='var(--bd)'">
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--gr);flex-shrink:0;"></div>
+        <div style="flex:1;font-size:10px;font-weight:600;">${d}</div>
+        <div style="font-size:9px;font-family:var(--mn);color:var(--bl);">Connect →</div>
+      </div>`).join('');
+    }
+    res.style.display='block';
+  },2200);
+}
+
+function connectDevice(el, deviceName, type){
+  el.style.borderColor='var(--gr)';
+  el.innerHTML=`<div style="width:8px;height:8px;border-radius:50%;background:var(--gr);flex-shrink:0;"></div><div style="flex:1;font-size:10px;font-weight:600;">${deviceName}</div><span class="p pg">Connected</span>`;
+  setTimeout(()=>{
+    closeM();
+    toast('Connected: '+deviceName.split(' · ')[0]);
+    const statusEl = document.getElementById('status-' + type);
+    if(statusEl){statusEl.className='p pg';statusEl.textContent='Connected';}
+    const subEl = document.getElementById('sub-' + type);
+    if(subEl){subEl.textContent=deviceName;}
+    const sel = document.querySelector(`.dev-select[onchange="handleDeviceChange('${type}',this)"]`);
+    if(sel){
+      const cleanName = deviceName.split(' (')[0];
+      let matched = false;
+      for(let i=0;i<sel.options.length;i++){
+        if(sel.options[i].text.startsWith(cleanName)){
+          sel.selectedIndex=i;
+          matched=true;
+          break;
+        }
+      }
+      if(!matched){
+        const opt = document.createElement('option');
+        opt.value = 'found-'+type;
+        opt.text = cleanName;
+        sel.insertBefore(opt, sel.options[sel.options.length-1]);
+        sel.selectedIndex = sel.options.length-2;
+      }
+    }
+  }, 800);
+}
+
+/* ── SCREENS ── */
+function eaRegister(){return ipad(`
+<div style="flex:1;display:flex;flex-direction:column;min-height:0;">
+  <div style="flex:1;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;overflow-y:auto;">
+    <div style="width:100%;max-width:310px;">
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="width:44px;height:44px;background:var(--gr);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L19 7" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div style="font-size:16px;font-weight:700;">Code verified!</div>
+        <div style="font-size:10px;color:var(--mu);margin-top:4px;">Set up your operator account</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="g2">
+          <div><div class="lbl">First name</div><input class="inp" style="margin-top:4px;" placeholder="Jordan"/></div>
+          <div><div class="lbl">Last name</div><input class="inp" style="margin-top:4px;" placeholder="Smith"/></div>
+        </div>
+        <div><div class="lbl">Email</div><input class="inp" style="margin-top:4px;" placeholder="booth@companya.com" type="email"/></div>
+        <div><div class="lbl">Phone (optional)</div><input class="inp" style="margin-top:4px;" placeholder="+971 51 234 5678" type="tel"/></div>
+        <div><div class="lbl">Set a password</div><input class="inp" style="margin-top:4px;" type="password" placeholder="••••••••"/></div>
+        <div class="btn bfu" style="border-radius:8px;padding:12px;margin-top:6px;font-size:13px;" onclick="showEA('events',null)">Create Account →</div>
+      </div>
+      <div style="text-align:center;margin-top:10px;font-size:10px;color:var(--mu);">Next time you can log in with email &amp; password.</div>
+    </div>
+  </div>
+</div>`);}
+
+function eaLogin(){return ipad(`
+<div style="flex:1;display:flex;flex-direction:column;min-height:0;">
+  <div style="flex:1;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:28px;overflow-y:auto;">
+    <div style="width:100%;max-width:310px;">
+      <div style="text-align:center;margin-bottom:24px;">
+        <div style="width:52px;height:52px;background:var(--bl);border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;font-family:var(--mn);color:#fff;margin:0 auto 12px;">EA</div>
+        <div style="font-size:18px;font-weight:700;">Event Manager Login</div>
+        <div style="font-size:11px;color:var(--mu);margin-top:4px;">Your client admin provides credentials</div>
+      </div>
+      <div style="display:flex;border:1.5px solid var(--bd);border-radius:8px;overflow:hidden;margin-bottom:16px;">
+        <div id="ea-tpw" style="flex:1;text-align:center;padding:8px;font-size:11px;font-weight:600;background:var(--bl);color:#fff;cursor:pointer;" onclick="eaMode('pw')">Email &amp; Password</div>
+        <div id="ea-tco" style="flex:1;text-align:center;padding:8px;font-size:11px;font-weight:600;background:transparent;color:var(--mu);cursor:pointer;" onclick="eaMode('code')">Access Code</div>
+      </div>
+      <div id="ea-pw" style="display:flex;flex-direction:column;gap:10px;">
+        <div><div class="lbl">Email</div><div class="inp" style="margin-top:4px;color:var(--mu);">booth@companya.com</div></div>
+        <div><div class="lbl">Password</div><div class="inp" style="margin-top:4px;color:var(--mu);">••••••••</div></div>
+      </div>
+      <div id="ea-co" style="display:none;flex-direction:column;gap:10px;">
+        <div><div class="lbl">6-digit access code</div><div style="display:flex;gap:6px;margin-top:4px;">${[...'EM2849'].map(ch=>`<div style="flex:1;aspect-ratio:1;background:#fff;border:2px solid var(--bd);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;font-family:var(--mn);">${ch}</div>`).join('')}</div></div>
+      </div>
+      <div class="btn bfu" style="border-radius:8px;padding:12px;margin-top:16px;font-size:13px;" onclick="eaSignIn()">Sign In →</div>
+      <div style="text-align:center;margin-top:10px;font-size:10px;color:var(--mu);">First time? Set your name &amp; password after login.</div>
+    </div>
+  </div>
+</div>`);}
+
+function eaMode(m){
+  const isPw=m==='pw';
+  $('ea-tpw').style.cssText+=';background:'+(isPw?'var(--bl)':'transparent')+';color:'+(isPw?'#fff':'var(--mu)')+';';
+  $('ea-tco').style.cssText+=';background:'+(!isPw?'var(--bl)':'transparent')+';color:'+(!isPw?'#fff':'var(--mu)')+';';
+  $('ea-pw').style.display=isPw?'flex':'none';
+  $('ea-co').style.display=!isPw?'flex':'none';
+}
+
+function eaSignIn(){
+  const isPw=!$('ea-co')||$('ea-co').style.display==='none';
+  if(isPw){showEA('events',null);}else{showEA('ea_register',null);}
+}
+
+function eaEvents(){
+  const evs=[
+    {name:'Annual Gala 2026',client:'Company A',date:'15 Mar 2026',sc:'pg',s:'Live'},
+    {name:'Corporate Dinner',client:'Company A',date:'22 Mar 2026',sc:'pa',s:'Upcoming'},
+    {name:'Product Launch',client:'Company B',date:'28 Mar 2026',sc:'pa',s:'Upcoming'},
+  ];
+  return ipad(`
+<div style="flex:1;display:flex;flex-direction:column;background:var(--bg);min-height:0;">
+  <div style="background:#fff;border-bottom:1px solid var(--bd);padding:12px 17px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+    <div><div style="font-size:15px;font-weight:700;">Welcome, Jordan 👋</div><div style="font-size:10px;color:var(--mu);font-family:var(--mn);margin-top:2px;">Select event to continue</div></div>
+    <div style="font-size:9px;font-family:var(--mn);color:var(--mu);cursor:pointer;border:1px solid var(--bd);padding:3px 9px;border-radius:5px;" onclick="showEA('login',null)">LOGOUT</div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:14px 16px;">
+    <div class="lbl" style="margin-bottom:10px;">Your assigned events (Role: Booth Operator)</div>
+    ${evs.map(ev=>`
+    <div style="background:#fff;border:1.5px solid var(--bd);border-radius:11px;padding:13px 14px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--bl)'" onmouseout="this.style.borderColor='var(--bd)'" onclick="showEA('setup',null)">
+      <div style="width:40px;height:40px;border-radius:9px;background:linear-gradient(135deg,#1A237E,#283593);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;font-family:var(--mn);">CA</div>
+      <div style="flex:1;"><div style="font-size:13px;font-weight:700;">${ev.name}</div><div style="font-size:10px;color:var(--mu);font-family:var(--mn);margin-top:2px;">${ev.client} · ${ev.date}</div></div>
+      <span class="p ${ev.sc}">${ev.s}</span>
+    </div>`).join('')}
+    <div style="margin-top:12px;padding:11px 12px;background:var(--bll);border-radius:9px;border:1px solid #A5B4FC;">
+      <div style="font-size:10px;font-weight:600;color:var(--bl);margin-bottom:3px;">Role-based access</div>
+      <div style="font-size:10px;color:var(--bl);">You can only see events your client admin has assigned to you. Need access to a different event? Contact your admin.</div>
+    </div>
+  </div>
+  ${eaN('events')}
+</div>`);}
+
+function eaSetup(){
+  const devices = [
+    {key:'camera', e:'📷', l:'Camera',    sel:'canon-r5',  sub:'Canon EOS R5 · USB',      sc:'pg', s:'Connected'},
+    {key:'flash',  e:'💡', l:'Flash',     sel:'godox-ad200', sub:'Godox AD200 · Bluetooth', sc:'pg', s:'Connected'},
+    {key:'printer',e:'🖨', l:'Printer',   sel:'dnp-ds620', sub:'DNP DS620A · Wi-Fi',       sc:'pr', s:'Offline'},
+    {key:'wifi',   e:'📡', l:'Wi-Fi',     sel:'venue-5g',  sub:'NAME-Venue-5G',             sc:'pg', s:'Connected'},
+  ];
+
+  const devRows = devices.map(d=>`
+    <div class="dev-row">
+      <div class="dev-top">
+        <div class="dev-icon">${d.e}</div>
+        <div class="dev-info">
+          <div class="dev-lbl">${d.l}</div>
+          <div class="dev-sub" id="sub-${d.key}">${d.sub}</div>
+        </div>
+        <span class="p ${d.sc}" id="status-${d.key}">${d.s}</span>
+      </div>
+      ${buildDeviceSelect(d.key, d.sel, d.sc)}
+    </div>`).join('');
+
+  return ipad(`
+<div style="flex:1;display:flex;flex-direction:column;background:var(--bg);min-height:0;">
+  <div style="background:#fff;border-bottom:1px solid var(--bd);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+    <div><div style="font-size:14px;font-weight:700;">Operator Setup</div><div style="font-size:10px;color:var(--mu);font-family:var(--mn);margin-top:2px;">Annual Gala 2026 · Company A</div></div>
+    <div style="font-size:10px;font-family:var(--mn);color:var(--bl);cursor:pointer;" onclick="showEA('events',null)">← Back</div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:12px;">
+    <div class="card">
+      <div style="font-size:12px;font-weight:700;margin-bottom:2px;">Connected Devices</div>
+      <div style="font-size:9px;color:var(--mu);font-family:var(--mn);margin-bottom:12px;">Select a device or use Find Device to scan nearby.</div>
+      ${devRows}
+    </div>
+    <div class="card" style="background:var(--bll);border-color:#A5B4FC;">
+      <div style="font-size:11px;font-weight:700;color:var(--bl);margin-bottom:8px;">Event Config (read-only)</div>
+      ${[['Mode','Still Photo, GIF, AI Transformation, 360 Video'],['Frames','4 (fixed)'],['Timer per frame','3s (fixed)'],['AI','Enabled'],['Overlay','Company Logo Frame'],['Sharing','QR, Email, SMS, WhatsApp, AirDrop'],['History access until','15 Mar 2026, 23:59']].map(([k,v])=>`<div style="display:flex;justify-content:space-between;font-size:10px;padding:3px 0;"><span style="color:var(--bl);">${k}</span><span style="font-weight:600;color:var(--bl);">${v}</span></div>`).join('')}
+    </div>
+    <div class="card">
+      <div style="font-size:12px;font-weight:700;margin-bottom:8px;">Today's Session</div>
+      <div style="display:flex;gap:8px;">
+        ${[['0','Sessions'],['0','Shares'],['-','Avg Rating']].map(([v,l])=>`<div style="flex:1;text-align:center;padding:8px;background:#fff;border-radius:7px;border:1px solid var(--bd);"><div style="font-size:18px;font-weight:700;">${v}</div><div style="font-size:8px;font-family:var(--mn);color:var(--mu);margin-top:2px;">${l}</div></div>`).join('')}
+      </div>
+    </div>
+    <div style="padding-bottom:6px;">
+      <div class="btn bgr bfu" style="border-radius:10px;padding:13px;font-size:13px;" onclick="toast('Booth launched! Attendee View opened.')">🚀 Launch Booth → Attendee View</div>
+    </div>
+  </div>
+  ${eaN('events')}
+</div>`);}
+
+function eaHistory(){
+  const sessions=[
+    {col:FC[0],type:'gif',mode:'GIF ',time:'14:32',method:'QR Code',shares:2,rating:4},
+    {col:'#1E6B3A',type:'still',mode:'Still Photo',time:'14:18',method:'Email',shares:1,rating:5},
+    {col:FC[2],type:'gif',mode:'GIF ',time:'14:05',method:'WhatsApp',shares:3,rating:4},
+    {col:'#4C1D95',type:'ai',mode:'AI Transform',time:'13:51',method:'SMS',shares:1,rating:0},
+    {col:'#0C3A5F',type:'360',mode:'360° Video',time:'13:44',method:'AirDrop',shares:1,rating:5},
+  ];
+  const gifThumb=(bg)=>FC.map((c,fi)=>`<div style="position:absolute;inset:0;background:linear-gradient(155deg,${c},${c}cc);animation:bf${fi+1} 3.2s linear infinite;display:flex;align-items:center;justify-content:center;"><div style="font-size:7px;font-family:var(--mn);color:rgba(255,255,255,.5);">F${fi+1}</div></div>`).join('');
+  return ipad(`
+<div style="flex:1;display:flex;flex-direction:column;min-height:0;">
+  <div style="background:#fff;border-bottom:1px solid var(--bd);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+    <div><div style="font-size:14px;font-weight:700;">Session History</div><div style="font-size:10px;color:var(--mu);font-family:var(--mn);margin-top:2px;">Annual Gala 2026 · Access until 15 Mar 23:59</div></div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <div style="text-align:center;"><div style="font-size:16px;font-weight:700;">5</div><div style="font-size:8px;font-family:var(--mn);color:var(--mu);">SESSIONS</div></div>
+      <div style="text-align:center;"><div style="font-size:16px;font-weight:700;">8</div><div style="font-size:8px;font-family:var(--mn);color:var(--mu);">SHARES</div></div>
+    </div>
+  </div>
+  <div style="background:var(--bll);border-bottom:1px solid #A5B4FC;padding:7px 16px;font-size:9px;font-family:var(--mn);color:var(--bl);flex-shrink:0;">
+    📋 You can view &amp; reshare. Share counts only - device does not retain saves beyond event window.
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:10px 14px;">
+    ${sessions.map(s=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 11px;background:#fff;border:1.5px solid var(--bd);border-radius:10px;margin-bottom:7px;cursor:pointer;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--bl)'" onmouseout="this.style.borderColor='var(--bd)'" onclick="openReshare('${s.mode}')">
+      <div class="thumb" style="width:46px;height:46px;border-radius:8px;flex-shrink:0;overflow:hidden;position:relative;background:${s.col};">
+        ${s.type==='gif'?gifThumb(s.col):
+          s.type==='ai'?`<div style="position:absolute;inset:0;background:linear-gradient(135deg,${s.col},#4C1D95);display:flex;align-items:center;justify-content:center;font-size:9px;font-family:var(--mn);color:rgba(255,255,255,.7);">AI✦</div>`:
+          s.type==='360'?`<div style="position:absolute;inset:0;background:linear-gradient(135deg,${s.col},#0369A1);display:flex;align-items:center;justify-content:center;font-size:9px;font-family:var(--mn);color:rgba(255,255,255,.7);">360°</div>`:
+          `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><rect x="2" y="4" width="16" height="12" rx="2" stroke="rgba(255,255,255,.6)" stroke-width="1.3"/><circle cx="10" cy="10" r="3" stroke="rgba(255,255,255,.6)" stroke-width="1.1"/></svg></div>`}
+      </div>
+      <div style="flex:1;"><div style="font-size:11px;font-weight:700;">${s.mode}</div><div style="font-size:9px;color:var(--mu);font-family:var(--mn);margin-top:3px;">${s.time} · ${s.method} · ${s.shares} share${s.shares>1?'s':''}</div></div>
+      <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;">${stars(s.rating,11)}<div style="font-size:8px;font-family:var(--mn);color:var(--bl);cursor:pointer;">Reshare →</div></div>
+    </div>`).join('')}
+  </div>
+  ${eaN('history')}
+</div>`);}
+
+function eaProfile(){return ipad(`
+<div style="flex:1;display:flex;flex-direction:column;min-height:0;">
+  <div style="background:#fff;border-bottom:1px solid var(--bd);padding:12px 16px;flex-shrink:0;">
+    <div style="font-size:14px;font-weight:700;">My Profile</div>
+    <div style="font-size:10px;color:var(--mu);font-family:var(--mn);margin-top:2px;">Event Manager account settings</div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:14px;">
+    <div style="background:#fff;border:1.5px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:700;margin-bottom:12px;">Account</div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <div style="width:46px;height:46px;border-radius:50%;background:var(--bl);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;">J</div>
+        <div><div style="font-size:13px;font-weight:700;">Jordan Smith</div><div style="font-size:10px;color:var(--mu);">booth@companya.com</div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div><div class="lbl">Display Name</div><div class="inp" style="margin-top:3px;">Jordan Smith</div></div>
+        <div><div class="lbl">Email</div><div class="inp" style="margin-top:3px;color:var(--mu);">booth@companya.com</div></div>
+        <div><div class="lbl">Phone</div><div class="inp" style="margin-top:3px;color:var(--mu);">+971 51 234 5678</div></div>
+        <div><div class="lbl">Change Password</div><div class="inp" style="margin-top:3px;color:var(--mu);">••••••••</div></div>
+      </div>
+    </div>
+    <div style="background:#fff;border:1.5px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:700;margin-bottom:10px;">Preferences</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bd);">
+        <div><div style="font-size:11px;font-weight:600;">Dark Mode</div><div style="font-size:9px;color:var(--mu);">Switch to dark interface</div></div>
+        <div class="sw" onclick="tog(this);toast('Dark mode toggled')"></div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bd);">
+        <div><div style="font-size:11px;font-weight:600;">Sound Effects</div><div style="font-size:9px;color:var(--mu);">Shutter click and countdown beeps</div></div>
+        <div class="sw on" onclick="tog(this)"></div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;">
+        <div><div style="font-size:11px;font-weight:600;">Show Timer Overlay</div><div style="font-size:9px;color:var(--mu);">Display countdown on viewfinder</div></div>
+        <div class="sw on" onclick="tog(this)"></div>
+      </div>
+    </div>
+    <div style="background:#fff;border:1.5px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:700;margin-bottom:8px;">Event Access</div>
+      <div style="font-size:10px;color:var(--mu);margin-bottom:10px;">Currently assigned to:</div>
+      <div style="background:var(--bll);border:1px solid #A5B4FC;border-radius:8px;padding:10px 12px;">
+        <div style="font-size:11px;font-weight:700;color:var(--bl);">Annual Gala 2026</div>
+        <div style="font-size:9px;color:var(--bl);font-family:var(--mn);margin-top:3px;">Company A · Access until 15 Mar 2026, 23:59</div>
+      </div>
+    </div>
+    <div style="background:var(--rel);border:1.5px solid #FCA5A5;border-radius:12px;padding:14px;margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:700;color:var(--re);margin-bottom:6px;">Danger Zone</div>
+      <div class="btn" style="background:var(--re);border-color:var(--re);border-radius:7px;padding:9px 16px;font-size:11px;width:100%;text-align:center;" onclick="showEA('login',null)">Log Out</div>
+    </div>
+  </div>
+  ${eaN('ea_profile')}
+</div>`);}
+
+function openReshare(mode){openM(`<span class="mc" onclick="closeM()">×</span>
+<div style="font-size:15px;font-weight:700;margin-bottom:5px;">Reshare: ${mode}</div>
+<div style="font-size:11px;color:var(--mu);margin-bottom:14px;">Send this photo again to the attendee via their preferred method.</div>
+<div style="display:flex;flex-direction:column;gap:8px;">
+  ${[['📧','Email'],['💬','SMS'],['🟢','WhatsApp'],['📲','QR Code'],['📡','AirDrop']].map(([ic,lbl])=>`<div style="display:flex;gap:8px;align-items:center;padding:9px 12px;background:var(--bg);border-radius:8px;cursor:pointer;border:1.5px solid var(--bd);" onclick="closeM();toast('Resent via ${lbl}')"><span style="font-size:16px;">${ic}</span><span style="font-size:11px;font-weight:600;">${lbl}</span></div>`).join('')}
+</div>`);}
+
+/* Init */
+renderEA('login');
+</script>
+</body>
+</html>

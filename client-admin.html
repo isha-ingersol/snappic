@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>NAME — Client Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#F4F3EF;--ink:#141412;--mu:#8A8A82;
+  --bl:#2246D4;--bll:#EEF1FD;
+  --gr:#1A7A42;--grl:#E8F5EE;
+  --re:#C41C1C;--rel:#FDEAEA;
+  --am:#B45309;--aml:#FDF5E6;
+  --pu:#6D28D9;--pul:#F3EFFD;
+  --or:#C2410C;--orl:#FDF0EB;
+  --bd:#E2E1DC;--ca:#FFF;
+  --dk:#0C0E1A;--dk2:#141828;
+  --mn:'DM Mono',monospace;--sf:'Sora',sans-serif;
+}
+html,body{height:100%;}
+body{font-family:var(--sf);color:var(--ink);background:var(--dk);display:flex;flex-direction:column;min-height:100svh;}
+
+/* SHELL */
+.shell{background:#080A14;border-bottom:1px solid #1A1F35;padding:0 14px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:200;height:42px;flex-shrink:0;}
+.s-logo{font-family:var(--mn);font-size:11px;font-weight:500;color:#93C5FD;letter-spacing:.14em;flex-shrink:0;}
+
+/* VIEW */
+.view{display:flex;flex-direction:column;height:calc(100svh - 42px);}
+
+/* SCREEN NAV */
+.snav{background:#080A14;border-bottom:1px solid #1A1F35;padding:6px 12px;display:flex;gap:2px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;flex-shrink:0;}
+.snav::-webkit-scrollbar{display:none;}
+.sn{font-family:var(--mn);font-size:8px;letter-spacing:.04em;padding:4px 8px;border-radius:4px;cursor:pointer;color:#475569;border:none;background:transparent;text-transform:uppercase;white-space:nowrap;transition:all .12s;}
+.sn:hover{color:#94A3B8;background:#141828;}
+.sn.on{background:#192D5A;color:#93C5FD;}
+.snav .sep{width:1px;background:#1A1F35;margin:0 3px;flex-shrink:0;}
+
+/* CANVASES */
+.wcanvas{flex:1;overflow-y:auto;padding:14px;background:#0A0C18;display:flex;justify-content:flex-start;align-items:flex-start;}
+
+/* WEB FRAME */
+.wf{background:var(--ca);border:1.5px solid var(--bd);border-radius:10px;overflow:visible;width:100%;max-width:900px;box-shadow:0 4px 24px rgba(0,0,0,.14);}
+.wch{background:#EDECEA;border-bottom:1px solid var(--bd);padding:7px 12px;display:flex;align-items:center;gap:8px;}
+.dot{width:10px;height:10px;border-radius:50%;}
+.dr{background:#FF5F57;}.dy{background:#FEBC2E;}.dg{background:#28C840;}
+.wu{flex:1;background:#fff;border-radius:4px;padding:3px 10px;font-size:9px;font-family:var(--mn);color:var(--mu);}
+
+/* APP NAV */
+.anav{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border-bottom:1px solid var(--bd);}
+.anavbrand{font-family:var(--mn);font-size:12px;font-weight:500;display:flex;align-items:center;gap:8px;}
+.anavlogo{width:24px;height:24px;border-radius:6px;background:var(--bl);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;}
+.anavlinks{display:flex;gap:18px;}
+.anl{font-size:11px;color:var(--mu);cursor:pointer;border-bottom:2px solid transparent;padding-bottom:1px;transition:all .15s;}
+.anl:hover,.anl.on{color:var(--ink);font-weight:600;border-color:var(--bl);}
+.anavr{display:flex;gap:8px;align-items:center;}
+.avt{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--bl),var(--pu));cursor:pointer;}
+
+/* ATOMS */
+.wc{padding:20px;}
+.h2{font-size:18px;font-weight:700;letter-spacing:-.02em;}
+.h3{font-size:13px;font-weight:600;}
+.mu{font-size:11px;color:var(--mu);line-height:1.5;}
+.lbl{font-family:var(--mn);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mu);margin-bottom:4px;}
+.inp{width:100%;background:var(--bg);border:1.5px solid var(--bd);border-radius:7px;padding:9px 12px;font-size:11px;color:var(--ink);font-family:var(--sf);outline:none;}
+.inp::placeholder{color:var(--mu);}
+.card{background:var(--bg);border:1.5px solid var(--bd);border-radius:10px;padding:14px;}
+.hr{height:1px;background:var(--bd);margin:12px 0;}
+.upl{border:2px dashed var(--bd);border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;background:var(--bg);padding:16px;cursor:pointer;transition:all .15s;}
+.upl:hover{border-color:var(--bl);background:var(--bll);}
+
+/* PILLS */
+.p{display:inline-flex;align-items:center;font-family:var(--mn);font-size:8px;padding:2px 7px;border-radius:20px;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;}
+.pb{background:var(--bll);color:var(--bl);border:1px solid #A5B4FC;}
+.pg{background:var(--grl);color:var(--gr);border:1px solid #86EFAC;}
+.pr{background:var(--rel);color:var(--re);border:1px solid #FCA5A5;}
+.pa{background:var(--aml);color:var(--am);border:1px solid #FCD34D;}
+.pp{background:var(--pul);color:var(--pu);border:1px solid #C4B5FD;}
+.pgr{background:#F1F5F9;color:var(--mu);border:1px solid var(--bd);}
+.po{background:var(--orl);color:var(--or);border:1px solid #FCA5A5;}
+
+/* BTNS */
+.btn{font-size:11px;font-weight:600;padding:9px 16px;border-radius:7px;background:var(--bl);color:#fff;cursor:pointer;transition:opacity .15s;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
+.btn:hover{opacity:.87;}
+.bgh{background:transparent;border:1.5px solid var(--bd);color:var(--ink);}
+.bgr{background:var(--gr);}
+.bre{background:var(--re);}
+.bfu{width:100%;}
+.wbtn{font-size:10px;font-weight:600;padding:6px 13px;border-radius:6px;background:var(--bl);color:#fff;cursor:pointer;}
+
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+
+/* TABS */
+.ptabs{display:flex;border-bottom:1px solid var(--bd);margin-bottom:16px;overflow-x:auto;gap:0;}
+.ptabs::-webkit-scrollbar{display:none;}
+.ptab{font-size:11px;font-weight:600;padding:8px 14px;color:var(--mu);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:all .15s;}
+.ptab.on{color:var(--bl);border-color:var(--bl);}
+
+/* TOGGLE */
+.tog{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bd);}
+.tog:last-child{border-bottom:none;}
+.tinf{flex:1;margin-right:12px;}
+.tlbl{font-size:11px;font-weight:600;}
+.tsub{font-size:10px;color:var(--mu);margin-top:2px;}
+.sw{width:34px;height:20px;border-radius:10px;background:var(--bd);position:relative;cursor:pointer;flex-shrink:0;transition:background .2s;}
+.sw.on{background:var(--bl);}
+.sw::after{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.sw.on::after{transform:translateX(14px);}
+
+/* FILTER */
+.fp{font-family:var(--mn);font-size:9px;padding:4px 10px;border-radius:20px;cursor:pointer;border:1.5px solid var(--bd);color:var(--mu);background:transparent;transition:all .15s;white-space:nowrap;}
+.fp.on{background:var(--bl);color:#fff;border-color:var(--bl);}
+
+/* PHOTO ROW */
+.pr-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg);border:1.5px solid var(--bd);border-radius:9px;margin-bottom:7px;cursor:pointer;transition:border-color .15s;}
+.pr-row:hover{border-color:var(--bl);}
+.pr-row.flag{border-color:var(--re);background:var(--rel);}
+.thumb{width:46px;height:46px;border-radius:8px;flex-shrink:0;overflow:hidden;position:relative;}
+
+/* TOAST & MODAL */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:11px;font-family:var(--mn);padding:9px 16px;border-radius:8px;z-index:9999;opacity:0;transition:opacity .28s;pointer-events:none;white-space:nowrap;max-width:90vw;}
+.toast.on{opacity:1;}
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:5000;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px);}
+.mo.hid{display:none;}
+.mb{background:#fff;border-radius:16px 16px 0 0;padding:22px;width:100%;max-width:500px;max-height:88svh;overflow-y:auto;position:relative;}
+.mb.w{max-width:620px;}
+@media(min-width:700px){.mo{align-items:center;padding:20px;}.mb{border-radius:16px;max-height:72svh;}}
+.mc{position:absolute;top:12px;right:14px;font-size:20px;cursor:pointer;color:var(--mu);}
+
+/* GIF */
+@keyframes bf1{0%,14%{opacity:1;}16%,83%{opacity:0;}86%,98%{opacity:1;}100%{opacity:0;}}
+@keyframes bf2{0%,15%{opacity:0;}17%,31%{opacity:1;}33%,68%{opacity:0;}70%,84%{opacity:1;}86%,100%{opacity:0;}}
+@keyframes bf3{0%,32%{opacity:0;}34%,48%{opacity:1;}50%,53%{opacity:0;}55%,69%{opacity:1;}71%,100%{opacity:0;}}
+@keyframes bf4{0%,49%{opacity:0;}51%,64%{opacity:1;}66%,100%{opacity:0;}}
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="s-logo">NAME · CLIENT ADMIN</div>
+</div>
+
+<div class="view on">
+  <div class="wcanvas" id="ca-c"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="mo hid" id="mo" onclick="closeMbg(event)">
+  <div class="mb" id="mb" style="position:relative;"></div>
+</div>
+
+<script>
+/* ── GLOBALS ── */
+const FC=['#1A237E','#991B1B','#92400E','#14532D'];
+let currentEvent = {name:'', isNew:false};
+
+/* ── UTILS ── */
+const $=id=>document.getElementById(id);
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2300);}
+function openM(h,wide=false){const b=$('mb');b.className='mb'+(wide?' w':'');b.innerHTML=h;$('mo').classList.remove('hid');}
+function closeM(){$('mo').classList.add('hid');}
+function closeMbg(e){if(e.target===$('mo'))closeM();}
+function tog(el){el.classList.toggle('on');}
+function togSw(el){el.classList.toggle('on');}
+
+function wframe(url,c){
+  return `<div class="wf"><div class="wch"><div style="display:flex;gap:4px;"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="wu">${url}</div></div>${c}</div>`;
+}
+function anav(brand,links,active,extra='',profileFn){
+  const ls=links.map(([id,lbl,sc])=>`<span class="anl ${active===id?'on':''}" onclick="showCA('${id}',null)">${lbl}</span>`).join('');
+  return `<div class="anav"><div class="anavbrand"><div class="anavlogo">${brand[0]}</div>${brand}</div><div class="anavlinks">${ls}</div><div class="anavr">${extra}<div class="avt" onclick="${profileFn}"></div></div></div>`;
+}
+function stars(r=0,sz=12){
+  return `<div style="display:flex;gap:2px;">${[1,2,3,4,5].map(n=>`<svg width="${sz}" height="${sz}" viewBox="0 0 20 20" fill="${n<=r?'#F59E0B':'#D1D5DB'}"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>`).join('')}</div>`;
+}
+
+/* ── CLIENT ADMIN ── */
+function showCA(s,btn){
+  document.querySelectorAll('.sn').forEach(b=>b.classList.remove('on'));
+  btn?.classList.add('on');renderCA(s);
+}
+function renderCA(s){
+  const c=$('ca-c');if(!c)return;
+  const m={login:caLogin,dash:caDash,setup:caSetup,roles:caRoles,sharing:caSharing,survey:caSurvey,analytics:caAnalytics,profile:caProfile,managers:caManagers};
+  c.innerHTML=`<div style="width:100%;max-width:900px;">${(m[s]||caLogin)()}</div>`;
+}
+
+const caN=(a)=>anav('NAME Client',[['dash','My Events','CA'],['analytics','Analytics','CA'],['managers','Managers','CA']],a,`<div class="wbtn" onclick="openEvent('')" style="margin-right:6px;">+ New Event</div>`,"showCA('profile',null)");
+
+function caProfile(){return wframe('app.NAME.com/client/profile',caN('profile')+`
+<div class="wc">
+  <div class="h2" style="margin-bottom:20px;">Account Settings</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div>
+      <div class="card" style="margin-bottom:14px;">
+        <div class="h3" style="margin-bottom:14px;">Profile</div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--bl),var(--pu));flex-shrink:0;cursor:pointer;" onclick="toast('Upload photo')"></div>
+          <div><div style="font-size:12px;font-weight:700;">Sarah Miller</div><div class="mu" style="font-size:10px;margin-top:2px;">sarah@companya.com</div></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="g2"><div><div class="lbl">First name</div><input class="inp" style="margin-top:4px;" value="Sarah"/></div><div><div class="lbl">Last name</div><input class="inp" style="margin-top:4px;" value="Miller"/></div></div>
+          <div><div class="lbl">Email</div><input class="inp" style="margin-top:4px;" value="sarah@companya.com" type="email"/></div>
+          <div><div class="lbl">Company</div><input class="inp" style="margin-top:4px;" value="Company A"/></div>
+          <div class="btn bfu" style="border-radius:8px;" onclick="toast('Profile saved ✓')">Save Changes</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="h3" style="margin-bottom:14px;">Security</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div><div class="lbl">Current password</div><input class="inp" style="margin-top:4px;" type="password" placeholder="••••••••"/></div>
+          <div><div class="lbl">New password</div><input class="inp" style="margin-top:4px;" type="password" placeholder="••••••••"/></div>
+          <div class="btn bgh bfu" style="border-radius:8px;" onclick="toast('Password updated ✓')">Update Password</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:14px;">
+        <div class="h3" style="margin-bottom:14px;">Notifications</div>
+        <div style="display:flex;flex-direction:column;">
+          <div class="tog"><div class="tinf"><div class="tlbl">Event goes live</div><div class="tsub">Notify when booth is launched</div></div><div class="sw on" onclick="togSw(this)"></div></div>
+          <div class="tog"><div class="tinf"><div class="tlbl">New photo milestones</div><div class="tsub">At 50, 100, 500 photos</div></div><div class="sw on" onclick="togSw(this)"></div></div>
+          <div class="tog"><div class="tinf"><div class="tlbl">Share activity</div><div class="tsub">When attendees share their photo</div></div><div class="sw" onclick="togSw(this)"></div></div>
+          <div class="tog"><div class="tinf"><div class="tlbl">Privacy flags</div><div class="tsub">Unusual sharing patterns detected</div></div><div class="sw on" onclick="togSw(this)"></div></div>
+          <div class="tog"><div class="tinf"><div class="tlbl">Survey responses</div><div class="tsub">Daily digest of survey feedback</div></div><div class="sw" onclick="togSw(this)"></div></div>
+          <div class="tog"><div class="tinf"><div class="tlbl">Weekly analytics report</div><div class="tsub">Every Monday by email</div></div><div class="sw on" onclick="togSw(this)"></div></div>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:14px;">
+        <div class="h3" style="margin-bottom:14px;">Preferences</div>
+        <div style="display:flex;flex-direction:column;">
+          <div class="tog"><div class="tinf"><div class="tlbl">Dark mode</div><div class="tsub">Use dark theme in dashboard</div></div><div class="sw" onclick="togSw(this)"></div></div>
+          <div class="tog"><div class="tinf"><div class="tlbl">Compact view</div><div class="tsub">Show more events per page</div></div><div class="sw" onclick="togSw(this)"></div></div>
+          <div class="tog"><div class="tinf"><div class="tlbl">Show tutorial tips</div><div class="tsub">Helpful hints for new features</div></div><div class="sw on" onclick="togSw(this)"></div></div>
+        </div>
+      </div>
+      <div class="btn bgh bfu" style="border-radius:8px;border-color:var(--re);color:var(--re);" onclick="showCA('login',null);toast('Signed out')">Sign Out</div>
+    </div>
+  </div>
+</div>`);}
+
+function caLogin(){return wframe('app.NAME.com/client/login',`
+<div class="wc" style="max-width:380px;margin:40px auto;">
+  <div style="text-align:center;margin-bottom:24px;"><div class="lbl" style="color:var(--bl);margin-bottom:6px;">Client Admin</div><div class="h2">Sign in</div><div class="mu" style="margin-top:4px;">Manage your events &amp; experiences</div></div>
+  <div style="display:flex;border:1.5px solid var(--bd);border-radius:8px;overflow:hidden;margin-bottom:16px;">
+    <div id="ca-tpw" style="flex:1;text-align:center;padding:8px;font-size:11px;font-weight:600;background:var(--bl);color:#fff;cursor:pointer;" onclick="caLM('pw')">Email &amp; Password</div>
+    <div id="ca-tco" style="flex:1;text-align:center;padding:8px;font-size:11px;font-weight:600;background:transparent;color:var(--mu);cursor:pointer;" onclick="caLM('code')">Invite Code</div>
+  </div>
+  <div id="ca-pw" style="display:flex;flex-direction:column;gap:12px;">
+    <div><div class="lbl">Email</div><input class="inp" style="margin-top:4px;" placeholder="you@company.com" type="email"/></div>
+    <div><div class="lbl">Password</div><input class="inp" style="margin-top:4px;" placeholder="••••••••" type="password"/></div>
+    <div class="btn bfu" style="border-radius:8px;padding:11px;" onclick="showCA('dash',null)">Sign In</div>
+  </div>
+  <div id="ca-co" style="display:none;flex-direction:column;gap:12px;">
+    <div><div class="lbl">8-digit invite code</div><div style="display:flex;gap:5px;margin-top:6px;">${[...'CA284917'].map(ch=>`<div style="flex:1;aspect-ratio:1;background:#fff;border:2px solid var(--bd);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;font-family:var(--mn);">${ch}</div>`).join('')}</div></div>
+    <div class="btn bfu" style="border-radius:8px;padding:11px;" onclick="showCA('register',null)">Verify Code →</div>
+    <div style="text-align:center;font-size:10px;color:var(--mu);margin-top:4px;">First time? You'll set up your account after verifying.</div>
+  </div>
+</div>`);} 
+function caLM(m){const p=m==='pw';['ca-tpw','ca-tco'].forEach((id,i)=>{const el=document.getElementById(id);if(el){el.style.background=((i===0&&p)||(i===1&&!p))?'var(--bl)':'transparent';el.style.color=((i===0&&p)||(i===1&&!p))?'#fff':'var(--mu)';}});const pw=document.getElementById('ca-pw');const co=document.getElementById('ca-co');if(pw)pw.style.display=p?'flex':'none';if(co)co.style.display=!p?'flex':'none';}
+
+function caDash(){
+  const evs=[{name:'Annual Gala 2026',meta:'15 Mar 2026 · 48 sessions · Live',sc:'pg',col:'#1A237E'},{name:'Product Launch 2026',meta:'20 Mar 2026 · 0 sessions · Upcoming',sc:'pa',col:'#1B5E20'},{name:'Year-End Party 2025',meta:'Ended · 134 sessions',sc:'pgr',col:'#263238',dim:true}];
+  return wframe('app.NAME.com/client',`
+${caN('dash')}
+<div class="wc">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;"><div><div class="h2">My Events</div><div class="mu" style="margin-top:2px;">Company A</div></div></div>
+  <div class="g3" style="margin-bottom:20px;">
+    ${[['2','Active'],['182','Sessions'],['4.7★','Avg Rating']].map(([v,l])=>`<div class="card" style="text-align:center;"><div style="font-size:22px;font-weight:700;">${v}</div><div class="lbl" style="margin:4px 0 0;">${l}</div></div>`).join('')}
+  </div>
+  ${evs.map(ev=>`
+  <div data-name="${ev.name}" style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg);border:1.5px solid var(--bd);border-radius:9px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;${ev.dim?'opacity:.55':''}" onmouseover="this.style.borderColor='var(--bl)'" onmouseout="this.style.borderColor='var(--bd)'" onclick="openEvent('${ev.name}')">
+    <div style="width:38px;height:38px;border-radius:9px;background:${ev.col};flex-shrink:0;"></div>
+    <div style="flex:1;"><div style="font-size:12px;font-weight:700;">${ev.name}</div><div style="font-size:10px;color:var(--mu);font-family:var(--mn);margin-top:2px;">${ev.meta}</div></div>
+    <span class="p ${ev.sc}">${ev.sc==='pg'?'Live':ev.sc==='pa'?'Upcoming':'Ended'}</span>
+  </div>`).join('')}
+</div>`);}
+
+let caTab='details';
+
+function openEvent(name){
+  currentEvent = {name: name, isNew: name===''};
+  showCA('setup', null);
+}
+
+function caSetup(){caTab='details';
+const title = currentEvent.isNew ? 'New Event' : currentEvent.name;
+return wframe('app.NAME.com/client/events/1/setup',`
+${caN('dash')}
+<div class="wc">
+  <div class="h2" style="margin-bottom:4px;">${title} — Setup</div>
+  <div class="mu" style="margin-bottom:16px;">Configure your event.</div>
+  <div class="ptabs" id="ca-ptabs">
+    ${[['details','1. Details'],['overlay','2. Overlays'],['gif','3. GIF Builder'],['attract','4. Attract Screen'],['sharing','5. Sharing'],['survey','6. Survey Builder'],['preview','7. Preview']].map(([id,lbl],i)=>`<div class="ptab ${i===0?'on':''}" onclick="caSwitchTab('${id}',this)">${lbl}</div>`).join('')}
+  </div>
+  <div id="ca-tab-c">${caTabDetails()}</div>
+</div>`);}
+function caSwitchTab(id,btn){
+  caTab=id;
+  document.querySelectorAll('#ca-ptabs .ptab').forEach(b=>b.classList.remove('on'));
+  btn?.classList.add('on');
+  const m={details:caTabDetails,overlay:caTabOverlay,gif:caTabGif,attract:caTabAttract,sharing:caTabSharing,survey:caTabSurvey,preview:caTabPreview};
+  const el=document.getElementById('ca-tab-c');if(el)el.innerHTML=(m[id]||caTabDetails)();
+}
+function caNext(id){caSwitchTab(id,document.querySelector(`#ca-ptabs .ptab:nth-child(${['details','overlay','gif','attract','sharing','survey','preview'].indexOf(id)+1})`));}
+
+function caTabDetails(){return `
+<div style="display:flex;flex-direction:column;gap:12px;max-width:600px;">
+  <div><div class="lbl">Event Name</div><input id="event-name-inp" class="inp" style="font-size:12px;font-weight:600;margin-top:4px;" placeholder="Enter event name…" value="${currentEvent.isNew ? '' : currentEvent.name}" oninput="currentEvent.name=this.value;currentEvent.isNew=false;"/></div>
+  <div><div class="lbl">Description (internal)</div><div class="inp" style="min-height:56px;margin-top:4px;color:var(--mu);">An elegant evening…</div></div>
+  <div class="g2">
+    <div><div class="lbl">Start Date</div><div class="inp" style="margin-top:4px;color:var(--mu);">15 Mar 2026</div></div>
+    <div><div class="lbl">End Date</div><div class="inp" style="margin-top:4px;color:var(--mu);">15 Mar 2026</div></div>
+  </div>
+  <div class="g2">
+    <div><div class="lbl">Logo (for attract screen)</div><div class="upl" style="height:70px;margin-top:4px;" onclick="toast('Upload PNG')"><svg width="18" height="18" viewBox="0 0 22 22" fill="none"><path d="M11 4v14M4 11h14" stroke="var(--mu)" stroke-width="1.8" stroke-linecap="round"/></svg><div style="font-size:10px;color:var(--mu);">Upload PNG</div></div></div>
+    <div><div class="lbl">Brand Color</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">${['#1A237E','#2246D4','#1A7A42','#C2410C','#141412'].map((c,i)=>`<div style="width:28px;height:28px;border-radius:5px;background:${c};border:${i===0?'2.5px solid var(--bl)':'1.5px solid var(--bd)'};cursor:pointer;" onclick="toast('Color set')"></div>`).join('')}</div></div>
+  </div>
+  <div style="display:flex;gap:10px;margin-top:4px;">
+    <div class="btn bgh" style="border-radius:7px;padding:10px 18px;" onclick="showCA('dash',null)">Cancel</div>
+    <div class="btn" style="border-radius:7px;padding:10px 22px;" onclick="caNext('overlay')">Next: Overlays →</div>
+  </div>
+</div>`;}
+
+function caTabOverlay(){
+  const ovls=[{l:'Company Logo Frame',t:'Static',c:'#1A237E',on:true},{l:'Golden Border',t:'Animated',c:'#7C3AED'},{l:'Congratulations',t:'Static',c:'#1A7A42'},{l:'Happy Birthday',t:'GIF Overlay',c:'#C2410C'},{l:'Branded Frame',t:'Static',c:'#141412'},{l:'Sparkle Transition',t:'Video Overlay',c:'#0369A1'}];
+  return `
+<div style="display:flex;flex-direction:column;gap:16px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+    <div><div class="h3">Overlay Studio</div><div class="mu" style="margin-top:2px;">Logos, frames, text and branding on your photos.</div></div>
+    <div style="display:flex;gap:8px;">
+      <div class="btn bgh" style="border-radius:7px;padding:7px 11px;font-size:10px;" onclick="openOvBuilder()">+ Build</div>
+      <div class="btn bgh" style="border-radius:7px;padding:7px 11px;font-size:10px;" onclick="openOvUpload()">↑ Upload</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;" id="ca-ov-f">
+    ${['All','Static','Animated','GIF Overlays','Video Overlays'].map((f,i)=>`<div class="fp ${i===0?'on':''}" onclick="filterOv(this,'${f}','ca-ov-g')">${f}</div>`).join('')}
+  </div>
+  <div class="g3" id="ca-ov-g">
+    ${ovls.map(ov=>`
+    <div data-t="${ov.t}" style="border:1.5px solid ${ov.on?'var(--bl)':'var(--bd)'};border-radius:10px;overflow:hidden;cursor:pointer;" onclick="toast('${ov.l}')">
+      <div style="height:76px;background:linear-gradient(135deg,${ov.c},${ov.c}88);display:flex;align-items:center;justify-content:center;position:relative;">
+        <div style="font-size:9px;font-family:var(--mn);color:rgba(255,255,255,.5);">PREVIEW</div>
+        ${ov.on?`<div style="position:absolute;top:5px;right:5px;background:var(--bl);border-radius:3px;padding:1px 5px;font-size:7px;font-family:var(--mn);color:#fff;">ACTIVE</div>`:''}
+      </div>
+      <div style="padding:8px 9px;background:var(--bg);">
+        <div style="font-size:10px;font-weight:600;">${ov.l}</div>
+        <div style="font-size:8px;font-family:var(--mn);color:var(--mu);margin-top:2px;">${ov.t}</div>
+      </div>
+    </div>`).join('')}
+  </div>
+  <div class="card">
+    <div class="h3" style="margin-bottom:8px;">Result Layout</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      ${['Before &amp; After','After Only','Animated Reveal','With Text'].map((l,i)=>`<div style="padding:5px 11px;border-radius:6px;border:1.5px solid ${i===0?'var(--bl)':'var(--bd)'};font-size:10px;font-weight:${i===0?'600':'400'};color:${i===0?'var(--bl)':'var(--mu)'};cursor:pointer;background:${i===0?'var(--bll)':'transparent'};" onclick="toast('Layout: ${l}')">${l}</div>`).join('')}
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;">
+    <div class="btn bgh" style="border-radius:7px;padding:10px 18px;" onclick="caNext('details')">← Back</div>
+    <div class="btn" style="border-radius:7px;padding:10px 22px;" onclick="caNext('gif')">Next: GIF Builder →</div>
+  </div>
+</div>`;}
+
+function filterOv(btn,type,gridId){
+  const par=btn.closest('[id]');
+  if(par){par.querySelectorAll('.fp').forEach(p=>p.classList.remove('on'));}
+  btn.classList.add('on');
+  const g=document.getElementById(gridId);
+  if(g)g.querySelectorAll('[data-t]').forEach(c=>{c.style.display=(type==='All'||c.dataset.t===type)?'':'none';});
+  toast('Filter: '+type);
+}
+
+function caTabGif(){return `
+<div style="display:flex;flex-direction:column;gap:16px;">
+  <div><div class="h3">GIF Builder</div><div class="mu" style="margin-top:2px;">Set animation mode. Event Manager cannot change frames or timer from the tablet.</div></div>
+  <div class="g2" id="ca-gif-modes">
+    <div id="ca-gm-s" style="border:2px solid var(--bl);border-radius:12px;padding:16px;cursor:pointer;background:var(--bll);" onclick="caGifMode('s')">
+      <div style="font-size:18px;margin-bottom:6px;">🖼</div>
+      <div style="font-size:12px;font-weight:700;color:var(--bl);">AI Transformation</div>
+      <div class="mu" style="margin-top:4px;font-size:10px;">One photo → AI animates transformation</div>
+      <div style="font-size:9px;font-family:var(--mn);color:var(--bl);margin-top:8px;">● SELECTED</div>
+    </div>
+    <div id="ca-gm-m" style="border:2px solid var(--bd);border-radius:12px;padding:16px;cursor:pointer;" onclick="caGifMode('m')">
+      <div style="font-size:18px;margin-bottom:6px;">🎞</div>
+      <div style="font-size:12px;font-weight:700;">GIF  Multi-Shot</div>
+      <div class="mu" style="margin-top:4px;font-size:10px;">Multiple frames → loop (exactly like Instagram)</div>
+      <div style="font-size:9px;font-family:var(--mn);color:var(--mu);margin-top:8px;">○ Click to select</div>
+    </div>
+  </div>
+  <div id="ca-gs-s" style="display:flex;flex-direction:column;gap:12px;">
+    <div class="card">
+      <div class="h3" style="margin-bottom:10px;">AI Transformation</div>
+      <div class="tog"><div class="tinf"><div class="tlbl">Show transformation steps</div><div class="tsub">Animate: original → bg remove → outfit → final</div></div><div class="sw on" onclick="tog(this)"></div></div>
+      <div class="tog"><div class="tinf"><div class="tlbl">Loop continuously</div><div class="tsub">Cycles back to original on repeat</div></div><div class="sw" onclick="tog(this)"></div></div>
+      <div style="margin-top:10px;"><div class="lbl" style="margin-bottom:6px;">Speed</div><div style="display:flex;gap:6px;">${['Slow','Normal','Fast'].map((s,i)=>`<div style="padding:5px 10px;border-radius:5px;border:1.5px solid ${i===1?'var(--bl)':'var(--bd)'};font-size:9px;cursor:pointer;background:${i===1?'var(--bll)':'transparent'};color:${i===1?'var(--bl)':'var(--mu)'};" onclick="toast('Speed: ${s}')">${s}</div>`).join('')}</div></div>
+    </div>
+  </div>
+  <div id="ca-gs-m" style="display:none;flex-direction:column;gap:12px;">
+    <div class="card">
+      <div class="h3" style="margin-bottom:10px;">Multi-Shot  Settings</div>
+      <div style="margin-bottom:12px;">
+        <div class="lbl" style="margin-bottom:6px;">Number of frames (set any amount — Event Manager cannot change this)</div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;">${[2,3,4,5,6,8,10,12].map(n=>`<div style="width:36px;height:36px;border-radius:7px;border:1.5px solid ${n===4?'var(--bl)':'var(--bd)'};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;cursor:pointer;background:${n===4?'var(--bll)':'transparent'};color:${n===4?'var(--bl)':'var(--ink)'};" onclick="toast('${n} frames — locked for Event Manager')">${n}</div>`).join('')}</div>
+        <div style="font-size:9px;font-family:var(--mn);color:var(--mu);margin-top:5px;">⚠ Locked for Event Manager on tablet. No upper limit.</div>
+      </div>
+      <div class="tog"><div class="tinf"><div class="tlbl"> loop</div><div class="tsub">F1→F2→F3→F4, pause 1s → F1→F2→F3→F4, pause 1s → repeats forever (no reverse)</div></div><div class="sw on" onclick="tog(this)"></div></div>
+      <div class="tog"><div class="tinf"><div class="tlbl">AI enhancement per frame</div><div class="tsub">Apply AI transforms to each captured frame</div></div><div class="sw on" onclick="tog(this)"></div></div>
+      <div style="margin-top:10px;"><div class="lbl" style="margin-bottom:6px;">Timer per frame (seconds)</div><div style="display:flex;gap:5px;">${[2,3,5,7,10].map(n=>`<div style="width:36px;height:36px;border-radius:7px;border:1.5px solid ${n===3?'var(--bl)':'var(--bd)'};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;cursor:pointer;background:${n===3?'var(--bll)':'transparent'};color:${n===3?'var(--bl)':'var(--ink)'};" onclick="toast('Timer: ${n}s — locked for Event Manager')">${n}s</div>`).join('')}</div></div>
+      <div style="margin-top:10px;"><div class="lbl" style="margin-bottom:6px;">Output format</div><div style="display:flex;gap:6px;">${['GIF','MP4','GIF + MP4'].map((s,i)=>`<div style="padding:5px 10px;border-radius:5px;border:1.5px solid ${i===2?'var(--bl)':'var(--bd)'};font-size:9px;cursor:pointer;background:${i===2?'var(--bll)':'transparent'};color:${i===2?'var(--bl)':'var(--mu)'};" onclick="toast('Format: ${s}')">${s}</div>`).join('')}</div></div>
+    </div>
+    <div class="card" style="background:var(--bll);border-color:#A5B4FC;">
+      <div style="font-size:11px;font-weight:700;color:var(--bl);margin-bottom:6px;">How works</div>
+      <div style="font-size:10px;color:var(--bl);">Plays frames forward: F1→F2→F3→F4, pauses 1 second, then loops back to F1. Continues forward and repeats — no reverse playback. Think of it as a looping slideshow with a pause at the end.</div>
+      <div style="display:flex;align-items:center;gap:3px;margin-top:10px;flex-wrap:wrap;">
+        ${FC.map((c,i)=>`<div style="width:32px;height:32px;border-radius:6px;background:${c};display:flex;align-items:center;justify-content:center;font-size:8px;font-family:var(--mn);color:rgba(255,255,255,.7);">F${i+1}</div>${i<3?`<div style="font-size:10px;color:var(--mu);">→</div>`:''}`).join('')}
+        <div style="font-size:10px;color:var(--mu);">⏸ 1s</div>
+        <div style="font-size:9px;font-family:var(--mn);color:var(--mu);padding:5px 8px;">→ back to F1 → loops</div>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;">
+    <div class="btn bgh" style="border-radius:7px;padding:10px 18px;" onclick="caNext('overlay')">← Back</div>
+    <div class="btn" style="border-radius:7px;padding:10px 22px;" onclick="caNext('attract')">Next: Attract Screen →</div>
+  </div>
+</div>`;}
+
+function caGifMode(m){
+  const isSingle=m==='s';
+  ['ca-gm-s','ca-gm-m'].forEach((id,i)=>{
+    const el=$(id);if(!el)return;
+    const isThis=(i===0&&isSingle)||(i===1&&!isSingle);
+    el.style.border=`2px solid ${isThis?'var(--bl)':'var(--bd)'}`;
+    el.style.background=isThis?'var(--bll)':'transparent';
+    el.querySelector('div:last-child').textContent=isThis?'● SELECTED':'○ Click to select';
+    el.querySelector('div:last-child').style.color=isThis?'var(--bl)':'var(--mu)';
+  });
+  $('ca-gs-s').style.display=isSingle?'flex':'none';
+  $('ca-gs-m').style.display=!isSingle?'flex':'none';
+}
+
+function caTabAttract(){return `
+<div style="display:flex;flex-direction:column;gap:16px;">
+  <div><div class="h3">Attract Screen</div><div class="mu" style="margin-top:2px;">Full-screen idle display when no session is active.</div></div>
+  <div class="g2" style="align-items:start;">
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div><div class="lbl" style="margin-bottom:8px;">Template</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          ${['Brand Dark','Brand Light','Minimal','Custom'].map((s,i)=>`<div style="height:66px;border-radius:8px;background:${['linear-gradient(135deg,#0C0E1A,#1A237E)','linear-gradient(135deg,#F4F3EF,#E2E5F0)','#F4F3EF','var(--bd)'][i]};border:${i===0?'2px solid var(--bl)':'1.5px solid var(--bd)'};cursor:pointer;display:flex;align-items:center;justify-content:center;" onclick="toast('${s} selected')"><div style="font-size:8px;font-family:var(--mn);color:${i===1?'var(--mu)':'rgba(255,255,255,.5)'};">${s}</div></div>`).join('')}
+        </div>
+      </div>
+      <div class="upl" onclick="toast('Upload PNG or MP4')"><svg width="18" height="18" viewBox="0 0 22 22" fill="none"><path d="M11 4v14M4 11h14" stroke="var(--mu)" stroke-width="1.8" stroke-linecap="round"/></svg><div style="font-size:10px;color:var(--mu);">Upload still or looping video</div><div style="font-size:8px;font-family:var(--mn);color:var(--mu);">PNG · MP4 · Max 20MB</div></div>
+      <div><div class="lbl">Idle message</div><div class="inp" style="margin-top:4px;">Tap anywhere to begin ✨</div></div>
+      <div><div class="lbl">Countdown timer per capture</div>
+        <div style="display:flex;gap:5px;margin-top:4px;">${[3,5,7,10].map(n=>`<div style="width:36px;height:36px;border-radius:7px;border:1.5px solid ${n===3?'var(--bl)':'var(--bd)'};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;cursor:pointer;background:${n===3?'var(--bll)':'transparent'};color:${n===3?'var(--bl)':'var(--ink)'};" onclick="toast('Timer: ${n}s — locked for Event Manager')">${n}s</div>`).join('')}</div>
+        <div style="font-size:9px;font-family:var(--mn);color:var(--mu);margin-top:4px;">⚠ Event Manager cannot change this</div>
+      </div>
+    </div>
+    <div>
+      <div class="lbl" style="margin-bottom:8px;">Live Preview</div>
+      <div style="background:linear-gradient(148deg,#0C0E1A,#1A237E);border-radius:10px;height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;">
+        <div style="width:36px;height:36px;background:rgba(255,255,255,.12);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:var(--mn);color:#fff;">CA</div>
+        <div style="font-size:13px;font-weight:700;color:#fff;">Annual Gala 2026</div>
+        <div style="font-size:9px;color:rgba(255,255,255,.38);font-family:var(--mn);">Tap anywhere to begin ✨</div>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;">
+    <div class="btn bgh" style="border-radius:7px;padding:10px 18px;" onclick="caNext('gif')">← Back</div>
+    <div class="btn" style="border-radius:7px;padding:10px 22px;" onclick="caNext('sharing')">Next: Sharing →</div>
+  </div>
+</div>`;}
+
+function caTabSharing(){return `
+<div style="display:flex;flex-direction:column;gap:16px;max-width:600px;">
+  <div><div class="h3">Sharing Options</div><div class="mu" style="margin-top:2px;">Toggle which methods attendees see on the share screen.</div></div>
+  ${[{l:'Email',s:'Send to guest email',on:true},{l:'SMS',s:'Send via text message',on:true},{l:'WhatsApp',s:'Send via WhatsApp',on:true},{l:'QR Code',s:'Guest scans to download instantly',on:true},{l:'AirDrop',s:'iOS nearby sharing (iPad only)',on:false}].map(m=>`
+  <div class="tog"><div class="tinf"><div class="tlbl">${m.l}</div><div class="tsub">${m.s}</div></div><div class="sw ${m.on?'on':''}" onclick="tog(this)"></div></div>`).join('')}
+  <div class="hr"></div>
+  <div class="h3" style="margin-bottom:10px;">Email Template</div>
+  <div style="display:flex;flex-direction:column;gap:10px;">
+    <div><div class="lbl">Subject</div><input class="inp" style="margin-top:4px;" value="Your photo from ${currentEvent.name||'the event'} 🎉"/></div>
+    <div><div class="lbl">Footer message</div><input class="inp" style="margin-top:4px;" value="Thank you for being part of the evening!"/></div>
+  </div>
+  <div style="display:flex;gap:10px;margin-top:4px;">
+    <div class="btn bgh" style="border-radius:7px;padding:10px 18px;" onclick="caNext('attract')">← Back</div>
+    <div class="btn" style="border-radius:7px;padding:10px 22px;" onclick="caNext('survey')">Next: Survey Builder →</div>
+  </div>
+</div>`;}
+
+function caTabSurvey(){return `
+<div style="display:flex;flex-direction:column;gap:16px;max-width:600px;">
+  <div><div class="h3">Survey Builder</div><div class="mu" style="margin-top:2px;">Optional feedback on the share screen. Fully skippable by guests.</div></div>
+  <div class="tog"><div class="tinf"><div class="tlbl">Enable Guest Survey</div><div class="tsub">Shown on the share screen — guests can skip</div></div><div class="sw on" onclick="tog(this)"></div></div>
+  <div class="g2" style="align-items:start;">
+    <div><div class="lbl" style="margin-bottom:8px;">Available Fields</div>
+      ${['⭐ Star Rating','📝 Comment','📧 Email Capture','📱 Phone Number','👍 Yes / No'].map(f=>`<div style="padding:9px 12px;background:var(--bg);border:1.5px solid var(--bd);border-radius:7px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;" onclick="toast('Added: ${f}')"><span>${f}</span><span style="font-size:10px;color:var(--bl);font-weight:600;">+ Add</span></div>`).join('')}
+    </div>
+    <div><div class="lbl" style="margin-bottom:8px;">Your Survey</div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;">
+        ${['⭐ Star Rating (shown inline)','📧 Email Capture'].map(f=>`<div style="padding:9px 12px;background:#fff;border:1.5px solid var(--bl);border-radius:7px;font-size:11px;display:flex;align-items:center;justify-content:space-between;"><span>${f}</span><span style="font-size:10px;color:var(--re);cursor:pointer;" onclick="toast('Removed')">✕</span></div>`).join('')}
+        <div style="padding:9px 12px;background:var(--bg);border:2px dashed var(--bd);border-radius:7px;font-size:10px;color:var(--mu);text-align:center;">+ Add fields from left</div>
+      </div>
+      <div class="lbl" style="margin-bottom:6px;">Show timing</div>
+      <div style="display:flex;gap:6px;">${['During Sharing','After Sharing'].map((t,i)=>`<div style="padding:5px 9px;border-radius:5px;border:1.5px solid ${i===0?'var(--bl)':'var(--bd)'};font-size:9px;cursor:pointer;background:${i===0?'var(--bll)':'transparent'};color:${i===0?'var(--bl)':'var(--mu)'};" onclick="toast('${t}')">${t}</div>`).join('')}</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;margin-top:4px;">
+    <div class="btn bgh" style="border-radius:7px;padding:10px 18px;" onclick="caNext('sharing')">← Back</div>
+    <div class="btn" style="border-radius:7px;padding:10px 22px;" onclick="caNext('preview')">Next: Preview →</div>
+  </div>
+</div>`;}
+
+function caTabPreview(){return `
+<div style="display:flex;flex-direction:column;gap:16px;max-width:700px;">
+  <div class="h3">Final Preview &amp; Publish</div>
+  <div class="g2">
+    <div><div class="lbl" style="margin-bottom:8px;">Banner</div>
+      <div style="background:#1A237E;border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
+        <div style="width:40px;height:40px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;font-family:var(--mn);">CA</div>
+        <div><div style="font-size:8px;font-family:var(--mn);color:rgba(255,255,255,.4);text-transform:uppercase;">Company A</div><div style="font-size:14px;font-weight:700;color:#fff;">${currentEvent.name||'Untitled Event'}</div><div style="font-size:9px;color:rgba(255,255,255,.5);margin-top:2px;">15 Mar 2026 · Dubai WTC</div></div>
+      </div>
+    </div>
+    <div><div class="lbl" style="margin-bottom:8px;">Tablet Preview</div>
+      <div style="background:var(--bg);border:1.5px solid var(--bd);border-radius:10px;overflow:hidden;">
+        <div style="background:#1A237E;padding:10px 12px;display:flex;align-items:center;gap:8px;"><div style="width:26px;height:26px;background:rgba(255,255,255,.15);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;font-family:var(--mn);">CA</div><div style="font-size:11px;font-weight:700;color:#fff;">${currentEvent.name||'Untitled Event'}</div></div>
+        <div style="padding:10px;"><div class="btn bfu" style="border-radius:6px;padding:7px;font-size:9px;" onclick="window.open('attendee.html','_blank');toast('Preview in Attendee View')">▶ Preview in Attendee View</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="background:var(--grl);border-color:#86EFAC;">
+    <div style="font-size:11px;font-weight:700;color:var(--gr);margin-bottom:4px;">Ready to publish</div>
+    <div style="font-size:10px;color:var(--gr);">✓ Details &nbsp;·&nbsp; ✓ Overlays &nbsp;·&nbsp; ✓ GIF &nbsp;·&nbsp; ✓ Attract &nbsp;·&nbsp; ✓ Sharing &nbsp;·&nbsp; ✓ Survey</div>
+  </div>
+  <div style="display:flex;gap:10px;">
+    <div class="btn bgh" style="border-radius:7px;padding:10px 18px;" onclick="caNext('survey')">← Back</div>
+    <div class="btn bgr" style="border-radius:7px;padding:10px 22px;" onclick="showCA('dash',null);toast('Event published ✓')">Save &amp; Publish ✓</div>
+  </div>
+</div>`;}
+
+function caRoles(){return wframe('app.NAME.com/client/events/1/roles',`
+${caN('dash')}
+<div class="wc">
+  <div class="h2" style="margin-bottom:4px;">Event Manager Roles</div>
+  <div class="mu" style="margin-bottom:16px;">Assign booth operators. They log in on their iPad and see only events you assign them to. History access is time-limited per your setting below — Client &amp; Super Admins keep history permanently.</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><div class="h3">Assigned Operators</div><div class="wbtn" onclick="openAddRole()">+ Add Operator</div></div>
+  ${[{name:'Alex Booth',email:'alex@staff.com',access:'All Company A events',expiry:'15 Mar 2026, 23:59',on:true},{name:'Sam Operator',email:'sam@staff.com',access:'This event only',expiry:'15 Mar 2026, 18:00',on:true},{name:'Jordan Crew',email:'jordan@staff.com',access:'This event only',expiry:'14 Mar 2026, 23:59',on:false}].map(r=>`
+  <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg);border:1.5px solid var(--bd);border-radius:9px;margin-bottom:8px;">
+    <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--bl),var(--pu));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;">${r.name[0]}</div>
+    <div style="flex:1;"><div style="font-size:12px;font-weight:700;">${r.name}</div><div style="font-size:10px;color:var(--mu);font-family:var(--mn);margin-top:2px;">${r.email} · ${r.access}</div><div style="font-size:10px;color:var(--mu);font-family:var(--mn);">History until: ${r.expiry}</div></div>
+    <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end;"><span class="p ${r.on?'pg':'pgr'}">${r.on?'Active':'Expired'}</span><div style="font-size:9px;color:var(--bl);cursor:pointer;" onclick="toast('Edit role')">Edit →</div></div>
+  </div>`).join('')}
+  <div class="card" style="background:var(--aml);border-color:#FCD34D;margin-top:8px;">
+    <div style="font-size:11px;font-weight:700;color:var(--am);margin-bottom:4px;">📋 Access rules</div>
+    <div style="font-size:10px;color:var(--am);">• Event Managers see only their assigned events<br>• History access expires per your time setting — after that they lose access<br>• You and Super Admin retain history permanently per event<br>• Revoke access instantly at any time</div>
+  </div>
+</div>`);}
+
+function caManagers(){return wframe('app.NAME.com/client/managers',`
+${caN('managers')}
+<div class="wc">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+    <div><div class="h2">Event Managers</div><div class="mu" style="margin-top:2px;margin-bottom:16px;">Manage operators and their event access for Company A.</div></div>
+    <div class="wbtn" onclick="openAddCAManager()">+ Add</div>
+  </div>
+  ${[
+    {name:'Jordan Smith',   email:'booth@companya.com',  phone:'+971 51 234 5678', code:'EM2849', events:['Annual Gala 2026'],                                         status:'pg',  sl:'Active'},
+    {name:'Riley Chen',     email:'riley@companya.com',  phone:'+971 52 345 6789', code:'EM3741', events:['Product Launch 2026'],                                      status:'pg',  sl:'Active'},
+    {name:'Morgan Taylor',  email:'morgan@companya.com', phone:'+971 55 456 7890', code:'EM5192', events:['Annual Gala 2026','Product Launch 2026','Year-End Party 2025'], status:'pa',  sl:'Pending'},
+  ].map(m=>`
+  <div style="background:var(--bg);border:1.5px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:10px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+      <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--bl),var(--pu));display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff;flex-shrink:0;">${m.name[0]}</div>
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:700;">${m.name}</div>
+        <div style="font-size:9px;color:var(--mu);font-family:var(--mn);margin-top:2px;">${m.email} · ${m.phone}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
+        <span class="p ${m.status}">${m.sl}</span>
+        <div style="background:var(--bg);border:1.5px solid var(--bd);border-radius:5px;padding:2px 8px;font-size:8px;font-family:var(--mn);color:var(--mu);">CODE: ${m.code}</div>
+      </div>
+    </div>
+    <div style="margin-bottom:10px;">
+      <div class="lbl" style="margin-bottom:5px;">Event Access</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;">
+        ${m.events.map(ev=>`<span class="p pb">${ev}</span>`).join('')}
+        <span style="display:inline-flex;align-items:center;font-family:var(--mn);font-size:8px;padding:2px 7px;border-radius:20px;border:1px dashed var(--bd);color:var(--bl);cursor:pointer;" onclick="toast('Assign event to ${m.name}')">+ Assign</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:7px;border-top:1px solid var(--bd);padding-top:10px;">
+      <div class="btn bgh" style="flex:1;border-radius:6px;padding:6px;font-size:9px;text-align:center;" onclick="toast('Editing ${m.name}')">Edit</div>
+      <div class="btn bgh" style="flex:1;border-radius:6px;padding:6px;font-size:9px;text-align:center;" onclick="toast('Code regenerated for ${m.name}')">Regen Code</div>
+      <div class="btn bgh" style="flex:1;border-radius:6px;padding:6px;font-size:9px;text-align:center;border-color:var(--re);color:var(--re);" onclick="toast('${m.name} removed')">Remove</div>
+    </div>
+  </div>`).join('')}
+</div>`);}
+
+function openAddCAManager(){openM(`<span class="mc" onclick="closeM()">×</span>
+<div style="font-size:15px;font-weight:700;margin-bottom:4px;">Add Event Manager</div>
+<div style="font-size:11px;color:var(--mu);margin-bottom:16px;">Share the auto-generated code with your operator. They use it to sign up in the Event Manager app.</div>
+<div style="display:flex;flex-direction:column;gap:10px;">
+  <div><div class="lbl">Assign Events (optional — can do later)</div>
+    <div style="display:flex;flex-direction:column;gap:5px;margin-top:4px;">
+      ${['Annual Gala 2026','Product Launch 2026','Year-End Party 2025'].map(ev=>`
+      <label style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg);border-radius:7px;border:1.5px solid var(--bd);cursor:pointer;font-size:11px;">
+        <input type="checkbox" style="accent-color:var(--bl);"/> ${ev}
+      </label>`).join('')}
+    </div>
+  </div>
+  <div style="background:var(--bll);border:1.5px solid #A5B4FC;border-radius:8px;padding:10px 12px;">
+    <div style="font-size:9px;font-family:var(--mn);color:var(--mu);margin-bottom:4px;">AUTO-GENERATED INVITE CODE</div>
+    <div style="font-size:22px;font-weight:700;font-family:var(--mn);color:var(--bl);letter-spacing:.12em;">EM${Math.floor(1000+Math.random()*9000)}</div>
+    <div style="font-size:9px;color:var(--mu);margin-top:3px;">Share this with your operator to let them sign up.</div>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:4px;">
+    <div class="btn bgh bfu" style="border-radius:8px;padding:10px;" onclick="closeM()">Cancel</div>
+    <div class="btn bfu" style="border-radius:8px;padding:10px;" onclick="closeM();toast('Invite created — share the code!')">Create Invite</div>
+  </div>
+</div>`);}
+
+function openAddRole(){openM(`<span class="mc" onclick="closeM()">×</span>
+<div style="font-size:15px;font-weight:700;margin-bottom:5px;">Add Event Manager</div>
+<div style="font-size:11px;color:var(--mu);margin-bottom:14px;">Operator receives login credentials by email.</div>
+<div style="display:flex;flex-direction:column;gap:10px;">
+  <div><div class="lbl">Name</div><input class="inp" style="margin-top:4px;" placeholder="Alex Booth"/></div>
+  <div><div class="lbl">Email</div><input class="inp" style="margin-top:4px;" placeholder="alex@staff.com" type="email"/></div>
+  <div><div class="lbl">Event Access</div><div style="display:flex;gap:6px;margin-top:4px;">${['This event only','All my events'].map((s,i)=>`<div style="padding:6px 11px;border-radius:6px;border:1.5px solid ${i===0?'var(--bl)':'var(--bd)'};font-size:10px;cursor:pointer;background:${i===0?'var(--bll)':'transparent'};color:${i===0?'var(--bl)':'var(--mu)'};" onclick="toast('${s}')">${s}</div>`).join('')}</div></div>
+  <div><div class="lbl">History access until</div><input class="inp" style="margin-top:4px;" placeholder="15 Mar 2026, 23:59" type="text"/></div>
+  <div style="display:flex;gap:8px;margin-top:4px;"><div class="btn bgh bfu" style="border-radius:8px;padding:10px;" onclick="closeM()">Cancel</div><div class="btn bfu" style="border-radius:8px;padding:10px;" onclick="closeM();toast('Operator added — credentials sent!')">Add Operator</div></div>
+</div>`);}
+
+function caSharing(){return wframe('app.NAME.com/client/sharing',`
+${caN('dash')}
+<div class="wc">
+  <div class="h2" style="margin-bottom:4px;">Sharing Options</div>
+  <div class="mu" style="margin-bottom:16px;">Toggle which methods attendees see on the share screen.</div>
+  ${[{l:'Email',s:'Send to guest email',on:true},{l:'SMS',s:'Send via text message',on:true},{l:'WhatsApp',s:'Send via WhatsApp',on:true},{l:'QR Code',s:'Guest scans to download instantly',on:true},{l:'AirDrop',s:'iOS nearby sharing (iPad only)',on:false}].map(m=>`
+  <div class="tog"><div class="tinf"><div class="tlbl">${m.l}</div><div class="tsub">${m.s}</div></div><div class="sw ${m.on?'on':''}" onclick="tog(this)"></div></div>`).join('')}
+  <div class="hr"></div>
+  <div class="h3" style="margin-bottom:10px;">Email Template</div>
+  <div style="display:flex;flex-direction:column;gap:10px;max-width:500px;">
+    <div><div class="lbl">Subject</div><div class="inp" style="margin-top:4px;">Your photo from Annual Gala 2026 🎉</div></div>
+    <div><div class="lbl">Footer</div><div class="inp" style="margin-top:4px;color:var(--mu);">Thank you for being part of the evening!</div></div>
+  </div>
+  <div style="margin-top:16px;"><div class="btn" style="border-radius:7px;padding:10px 20px;" onclick="toast('Saved!')">Save Changes</div></div>
+</div>`);}
+
+function caSurvey(){return wframe('app.NAME.com/client/survey',`
+${caN('dash')}
+<div class="wc">
+  <div class="h2" style="margin-bottom:4px;">Survey Builder</div>
+  <div class="mu" style="margin-bottom:12px;">Optional feedback on the share screen. Fully skippable by guests — stars appear inline without a separate page.</div>
+  <div class="tog" style="margin-bottom:14px;"><div class="tinf"><div class="tlbl">Enable Guest Survey</div><div class="tsub">Shown on the share screen — guests can skip</div></div><div class="sw on" onclick="tog(this)"></div></div>
+  <div class="g2" style="align-items:start;">
+    <div><div class="lbl" style="margin-bottom:8px;">Available Fields</div>
+      ${['⭐ Star Rating','📝 Comment','📧 Email Capture','📱 Phone Number','👍 Yes / No'].map(f=>`<div style="padding:9px 12px;background:var(--bg);border:1.5px solid var(--bd);border-radius:7px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;" onclick="toast('Added: ${f}')"><span>${f}</span><span style="font-size:10px;color:var(--bl);font-weight:600;">+ Add</span></div>`).join('')}
+    </div>
+    <div><div class="lbl" style="margin-bottom:8px;">Your Survey</div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;">
+        ${['⭐ Star Rating (shown inline — no tap needed)','📧 Email Capture'].map(f=>`<div style="padding:9px 12px;background:#fff;border:1.5px solid var(--bl);border-radius:7px;font-size:11px;display:flex;align-items:center;justify-content:space-between;"><span>${f}</span><span style="font-size:10px;color:var(--re);cursor:pointer;" onclick="toast('Removed')">✕</span></div>`).join('')}
+        <div style="padding:9px 12px;background:var(--bg);border:2px dashed var(--bd);border-radius:7px;font-size:10px;color:var(--mu);text-align:center;">+ Add fields from left</div>
+      </div>
+      <div class="lbl" style="margin-bottom:6px;">Show timing</div>
+      <div style="display:flex;gap:6px;">${['During Sharing','After Sharing'].map((t,i)=>`<div style="padding:5px 9px;border-radius:5px;border:1.5px solid ${i===0?'var(--bl)':'var(--bd)'};font-size:9px;cursor:pointer;background:${i===0?'var(--bll)':'transparent'};color:${i===0?'var(--bl)':'var(--mu)'};" onclick="toast('${t}')">${t}</div>`).join('')}</div>
+    </div>
+  </div>
+  <div style="margin-top:16px;"><div class="btn" style="border-radius:7px;padding:10px 20px;" onclick="toast('Survey saved!')">Save Survey</div></div>
+</div>`);}
+
+function caAnalytics(){
+  const photos=[
+    {id:'GA-001',col:'#1A237E',mode:'GIF',shares:4,methods:['Email','QR'],rating:5,time:'14:32',people:2,flag:false},
+    {id:'GA-002',col:'#1A7A42',mode:'Still Photo',shares:1,methods:['AirDrop'],rating:4,time:'14:18',people:1,flag:false},
+    {id:'GA-003',col:'#C2410C',mode:'GIF',shares:10,methods:['SMS','Email','QR'],rating:5,time:'14:05',people:3,flag:true},
+    {id:'GA-004',col:'#6D28D9',mode:'AI Transform',shares:1,methods:['WhatsApp'],rating:3,time:'13:51',people:1,flag:false},
+    {id:'GA-005',col:'#0C4A6E',mode:'360° Video',shares:2,methods:['QR'],rating:0,time:'13:44',people:2,flag:false},
+  ];
+  return wframe('app.NAME.com/client/analytics',`
+${caN('analytics')}
+<div class="wc">
+  <div class="h2" style="margin-bottom:4px;">Analytics</div>
+  <div class="mu" style="margin-bottom:16px;">Annual Gala 2026 · Company A</div>
+  <div class="g3" style="margin-bottom:20px;">
+    ${[['48','Sessions'],['112','Total Shares'],['4.7★','Avg Rating']].map(([v,l])=>`<div class="card" style="text-align:center;"><div style="font-size:22px;font-weight:700;">${v}</div><div class="lbl" style="margin:4px 0 0;">${l}</div></div>`).join('')}
+  </div>
+  <div class="card" style="margin-bottom:16px;">
+    <div class="h3" style="margin-bottom:10px;">Shares by Method</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      ${[{m:'Email',n:38,c:'var(--bl)'},{m:'QR',n:31,c:'var(--or)'},{m:'SMS',n:18,c:'var(--gr)'},{m:'WhatsApp',n:14,c:'#16A34A'},{m:'AirDrop',n:11,c:'var(--mu)'}].map(s=>`<div style="flex:1;min-width:60px;text-align:center;padding:10px 6px;background:var(--bg);border-radius:8px;border:1.5px solid var(--bd);"><div style="font-size:16px;font-weight:700;color:${s.c};">${s.n}</div><div style="font-size:8px;font-family:var(--mn);color:var(--mu);margin-top:2px;">${s.m}</div></div>`).join('')}
+    </div>
+  </div>
+  <div style="background:var(--rel);border:1.5px solid #FCA5A5;border-radius:9px;padding:12px 14px;margin-bottom:14px;">
+    <div style="font-size:11px;font-weight:700;color:var(--re);margin-bottom:4px;">🚩 Privacy Flag: 1 anomaly detected</div>
+    <div style="font-size:10px;color:var(--re);">GA-003 has 10 shares but only 3 people in the photo. Possible unauthorised distribution. Investigate and consider revoking the share link.</div>
+  </div>
+  <div class="h3" style="margin-bottom:10px;">Photo-Level Detail</div>
+  ${photos.map(p=>`
+  <div class="pr-row ${p.flag?'flag':''}" onclick="openPhotoDetail('${p.id}','${p.mode}',${p.shares},'${p.methods.join(', ')}',${p.rating},${p.people},${p.flag})">
+    <div class="thumb" style="background:${p.col};"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><rect x="2" y="4" width="16" height="12" rx="2" stroke="rgba(255,255,255,.6)" stroke-width="1.3"/><circle cx="10" cy="10" r="3" stroke="rgba(255,255,255,.6)" stroke-width="1.1"/></svg></div>${p.flag?`<div style="position:absolute;top:-2px;right:-2px;background:var(--re);border-radius:50%;width:14px;height:14px;display:flex;align-items:center;justify-content:center;font-size:8px;">🚩</div>`:''}</div>
+    <div style="flex:1;"><div style="font-size:11px;font-weight:700;">${p.id} · ${p.mode}</div><div style="font-size:9px;color:var(--mu);font-family:var(--mn);margin-top:2px;">${p.time} · ${p.shares} share${p.shares>1?'s':''} · ${p.methods.join(', ')}</div>${p.flag?`<div style="font-size:9px;color:var(--re);font-family:var(--mn);">⚠ ${p.people} people, ${p.shares} shares</div>`:''}</div>
+    <div>${stars(p.rating,11)}</div>
+  </div>`).join('')}
+</div>`);}
+
+function openPhotoDetail(id,mode,shares,methods,rating,people,flag){
+  openM(`<span class="mc" onclick="closeM()">×</span>
+  <div style="font-size:15px;font-weight:700;margin-bottom:5px;">${id} — Detail</div>
+  <div class="mu" style="margin-bottom:12px;">${mode} · ${shares} share${shares>1?'s':''}</div>
+  ${flag?`<div style="background:var(--rel);border:1.5px solid #FCA5A5;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:10px;color:var(--re);font-weight:600;">🚩 PRIVACY FLAG: ${people} people in photo, ${shares} shares. Possible unauthorised distribution.</div>`:''}
+  <div style="height:90px;background:linear-gradient(135deg,#1A237E,#283593);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;"><svg width="28" height="38" viewBox="0 0 60 80" fill="none"><circle cx="30" cy="18" r="14" stroke="rgba(255,255,255,.4)" stroke-width="1.5"/><path d="M6 76c0-13.255 10.745-24 24-24s24 10.745 24 24" stroke="rgba(255,255,255,.4)" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+  <div class="lbl" style="margin-bottom:6px;">Share breakdown</div>
+  <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:12px;">
+    ${methods.split(', ').map(m=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:var(--bg);border-radius:7px;"><span style="font-size:11px;">${m}</span><span style="font-family:var(--mn);font-size:11px;font-weight:600;">1×</span></div>`).join('')}
+  </div>
+  <div class="lbl" style="margin-bottom:5px;">Guest feedback</div>
+  ${rating>0?stars(rating,16):`<div style="font-size:10px;color:var(--mu);font-style:italic;">No feedback submitted</div>`}
+  ${flag?`<div class="btn bre bfu" style="border-radius:8px;padding:10px;margin-top:12px;" onclick="closeM();toast('Share link revoked for ${id}')">Revoke Share Link</div>`:''}
+  <div class="btn bgh bfu" style="border-radius:8px;padding:10px;margin-top:8px;" onclick="closeM()">Close</div>`);
+}
+
+/* SHARED MODALS */
+function openOvBuilder(){openM(`<span class="mc" onclick="closeM()">×</span>
+<div style="font-size:15px;font-weight:700;margin-bottom:5px;">Overlay Builder</div>
+<div style="font-size:11px;color:var(--mu);margin-bottom:14px;">Add logos, text frames and branding elements.</div>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
+  ${['📷 Logo','T Text','⭐ Sticker','▭ Frame','🎉 Celebration','🎂 Birthday'].map(t=>`<div style="padding:4px 9px;border-radius:5px;border:1.5px solid var(--bd);font-size:9px;cursor:pointer;background:var(--bg);" onclick="toast('Add: ${t}')">${t}</div>`).join('')}
+</div>
+<div style="height:150px;background:var(--bg);border:2px dashed var(--bd);border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;">
+  <div style="text-align:center;"><div style="font-size:10px;color:var(--mu);">Canvas — drag elements here</div></div>
+</div>
+<div style="display:flex;gap:8px;"><div class="btn bgh bfu" style="border-radius:8px;padding:10px;" onclick="closeM()">Cancel</div><div class="btn bfu" style="border-radius:8px;padding:10px;" onclick="closeM();toast('Overlay saved!')">Save Overlay</div></div>`);}
+
+function openOvUpload(){openM(`<span class="mc" onclick="closeM()">×</span>
+<div style="font-size:15px;font-weight:700;margin-bottom:5px;">Upload Overlay</div>
+<div class="upl" style="margin:12px 0;min-height:120px;" onclick="toast('Select file')">
+  <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 4v14M4 11h14" stroke="var(--mu)" stroke-width="1.8" stroke-linecap="round"/></svg>
+  <div style="font-size:11px;color:var(--mu);">Click to select file</div>
+  <div style="font-size:9px;font-family:var(--mn);color:var(--mu);">PNG (transparent) · GIF · MP4 · Max 20MB</div>
+</div>
+<div style="display:flex;gap:8px;"><div class="btn bgh bfu" style="border-radius:8px;padding:10px;" onclick="closeM()">Cancel</div><div class="btn bfu" style="border-radius:8px;padding:10px;" onclick="closeM();toast('Overlay uploaded!')">Upload</div></div>`);}
+
+/* Init */
+showCA('login');
+</script>
+</body>
+</html>

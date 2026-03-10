@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>NAME - Super Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#F4F3EF;--ink:#141412;--mu:#8A8A82;
+  --bl:#2246D4;--bll:#EEF1FD;
+  --gr:#1A7A42;--grl:#E8F5EE;
+  --re:#C41C1C;--rel:#FDEAEA;
+  --am:#B45309;--aml:#FDF5E6;
+  --pu:#6D28D9;--pul:#F3EFFD;
+  --or:#C2410C;--orl:#FDF0EB;
+  --bd:#E2E1DC;--ca:#FFF;
+  --dk:#0C0E1A;--dk2:#141828;
+  --mn:'DM Mono',monospace;--sf:'Sora',sans-serif;
+}
+html,body{height:100%;}
+body{font-family:var(--sf);color:var(--ink);background:var(--dk);display:flex;flex-direction:column;min-height:100svh;}
+
+/* SHELL */
+.shell{background:#080A14;border-bottom:1px solid #1A1F35;padding:0 14px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:200;height:42px;flex-shrink:0;}
+.s-logo{font-family:var(--mn);font-size:11px;font-weight:500;color:#93C5FD;letter-spacing:.14em;flex-shrink:0;}
+
+/* VIEW */
+.view{display:flex;flex-direction:column;height:calc(100svh - 42px);}
+
+/* SCREEN NAV */
+.snav{background:#080A14;border-bottom:1px solid #1A1F35;padding:6px 12px;display:flex;gap:2px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;flex-shrink:0;}
+.snav::-webkit-scrollbar{display:none;}
+.sn{font-family:var(--mn);font-size:8px;letter-spacing:.04em;padding:4px 8px;border-radius:4px;cursor:pointer;color:#475569;border:none;background:transparent;text-transform:uppercase;white-space:nowrap;transition:all .12s;}
+.sn:hover{color:#94A3B8;background:#141828;}
+.sn.on{background:#192D5A;color:#93C5FD;}
+.snav .sep{width:1px;background:#1A1F35;margin:0 3px;flex-shrink:0;}
+
+/* CANVASES */
+.wcanvas{flex:1;overflow-y:auto;padding:14px;background:#0A0C18;display:flex;justify-content:flex-start;align-items:flex-start;}
+
+/* WEB FRAME */
+.wf{background:var(--ca);border:1.5px solid var(--bd);border-radius:10px;overflow:visible;width:100%;max-width:900px;box-shadow:0 4px 24px rgba(0,0,0,.14);}
+.wch{background:#EDECEA;border-bottom:1px solid var(--bd);padding:7px 12px;display:flex;align-items:center;gap:8px;}
+.dot{width:10px;height:10px;border-radius:50%;}
+.dr{background:#FF5F57;}.dy{background:#FEBC2E;}.dg{background:#28C840;}
+.wu{flex:1;background:#fff;border-radius:4px;padding:3px 10px;font-size:9px;font-family:var(--mn);color:var(--mu);}
+
+/* APP NAV */
+.anav{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border-bottom:1px solid var(--bd);}
+.anavbrand{font-family:var(--mn);font-size:12px;font-weight:500;display:flex;align-items:center;gap:8px;}
+.anavlogo{width:24px;height:24px;border-radius:6px;background:var(--bl);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;}
+.anavlinks{display:flex;gap:18px;}
+.anl{font-size:11px;color:var(--mu);cursor:pointer;border-bottom:2px solid transparent;padding-bottom:1px;transition:all .15s;}
+.anl:hover,.anl.on{color:var(--ink);font-weight:600;border-color:var(--bl);}
+.anavr{display:flex;gap:8px;align-items:center;}
+.avt{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--bl),var(--re));cursor:pointer;}
+
+/* ATOMS */
+.wc{padding:20px;}
+.h2{font-size:18px;font-weight:700;letter-spacing:-.02em;}
+.h3{font-size:13px;font-weight:600;}
+.mu{font-size:11px;color:var(--mu);line-height:1.5;}
+.lbl{font-family:var(--mn);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mu);margin-bottom:4px;}
+.inp{width:100%;background:var(--bg);border:1.5px solid var(--bd);border-radius:7px;padding:9px 12px;font-size:11px;color:var(--ink);font-family:var(--sf);outline:none;}
+.inp::placeholder{color:var(--mu);}
+.card{background:var(--bg);border:1.5px solid var(--bd);border-radius:10px;padding:14px;}
+.hr{height:1px;background:var(--bd);margin:12px 0;}
+.upl{border:2px dashed var(--bd);border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;background:var(--bg);padding:16px;cursor:pointer;transition:all .15s;}
+.upl:hover{border-color:var(--bl);background:var(--bll);}
+
+/* PILLS */
+.p{display:inline-flex;align-items:center;font-family:var(--mn);font-size:8px;padding:2px 7px;border-radius:20px;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;}
+.pb{background:var(--bll);color:var(--bl);border:1px solid #A5B4FC;}
+.pg{background:var(--grl);color:var(--gr);border:1px solid #86EFAC;}
+.pr{background:var(--rel);color:var(--re);border:1px solid #FCA5A5;}
+.pa{background:var(--aml);color:var(--am);border:1px solid #FCD34D;}
+.pp{background:var(--pul);color:var(--pu);border:1px solid #C4B5FD;}
+.pgr{background:#F1F5F9;color:var(--mu);border:1px solid var(--bd);}
+.po{background:var(--orl);color:var(--or);border:1px solid #FCA5A5;}
+.prd{background:#FEE2E2;color:#B91C1C;border:1px solid #FECACA;}
+
+/* BTNS */
+.btn{font-size:11px;font-weight:600;padding:9px 16px;border-radius:7px;background:var(--bl);color:#fff;cursor:pointer;transition:opacity .15s;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
+.btn:hover{opacity:.87;}
+.bgh{background:transparent;border:1.5px solid var(--bd);color:var(--ink);}
+.bgr{background:var(--gr);}
+.bre{background:var(--re);}
+.bfu{width:100%;}
+.wbtn{font-size:10px;font-weight:600;padding:6px 13px;border-radius:6px;background:var(--bl);color:#fff;cursor:pointer;}
+
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+
+/* TABS */
+.ptabs{display:flex;border-bottom:1px solid var(--bd);margin-bottom:16px;overflow-x:auto;gap:0;}
+.ptabs::-webkit-scrollbar{display:none;}
+.ptab{font-size:11px;font-weight:600;padding:8px 14px;color:var(--mu);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:all .15s;}
+.ptab.on{color:var(--bl);border-color:var(--bl);}
+
+/* TOGGLE */
+.tog{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bd);}
+.tog:last-child{border-bottom:none;}
+.tinf{flex:1;margin-right:12px;}
+.tlbl{font-size:11px;font-weight:600;}
+.tsub{font-size:10px;color:var(--mu);margin-top:2px;}
+.sw{width:34px;height:20px;border-radius:10px;background:var(--bd);position:relative;cursor:pointer;flex-shrink:0;transition:background .2s;}
+.sw.on{background:var(--bl);}
+.sw::after{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.sw.on::after{transform:translateX(14px);}
+
+/* FILTER */
+.fp{font-family:var(--mn);font-size:9px;padding:4px 10px;border-radius:20px;cursor:pointer;border:1.5px solid var(--bd);color:var(--mu);background:transparent;transition:all .15s;white-space:nowrap;}
+.fp.on{background:var(--bl);color:#fff;border-color:var(--bl);}
+
+/* PHOTO ROW */
+.pr-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg);border:1.5px solid var(--bd);border-radius:9px;margin-bottom:7px;cursor:pointer;transition:border-color .15s;}
+.pr-row:hover{border-color:var(--bl);}
+.pr-row.flag{border-color:var(--re);background:var(--rel);}
+.thumb{width:46px;height:46px;border-radius:8px;flex-shrink:0;overflow:hidden;position:relative;}
+
+/* TOAST & MODAL */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:11px;font-family:var(--mn);padding:9px 16px;border-radius:8px;z-index:9999;opacity:0;transition:opacity .28s;pointer-events:none;white-space:nowrap;max-width:90vw;}
+.toast.on{opacity:1;}
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:5000;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px);}
+.mo.hid{display:none;}
+.mb{background:#fff;border-radius:16px 16px 0 0;padding:22px;width:100%;max-width:500px;max-height:70svh;overflow-y:auto;position:relative;}
+.mb.w{max-width:620px;}
+@media(min-width:700px){.mo{align-items:center;padding:20px;}.mb{border-radius:16px;max-height:72svh;}}
+.mc{position:absolute;top:12px;right:14px;font-size:20px;cursor:pointer;color:var(--mu);}
+
+/* GIF */
+@keyframes bf1{0%,14%{opacity:1;}16%,83%{opacity:0;}86%,98%{opacity:1;}100%{opacity:0;}}
+@keyframes bf2{0%,15%{opacity:0;}17%,31%{opacity:1;}33%,68%{opacity:0;}70%,84%{opacity:1;}86%,100%{opacity:0;}}
+@keyframes bf3{0%,32%{opacity:0;}34%,48%{opacity:1;}50%,53%{opacity:0;}55%,69%{opacity:1;}71%,100%{opacity:0;}}
+@keyframes bf4{0%,49%{opacity:0;}51%,64%{opacity:1;}66%,100%{opacity:0;}}
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="s-logo">NAME · SUPER ADMIN</div>
+</div>
+
+<div class="view on">
+  <div class="wcanvas" id="sa-c"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="mo hid" id="mo" onclick="closeMbg(event)">
+  <div class="mb" id="mb" style="position:relative;"></div>
+</div>
+
+<script>
+/* ── GLOBALS ── */
+const FC=['#1A237E','#991B1B','#92400E','#14532D'];
+let currentEvent = {name:'', isNew:false};
+
+/* ── UTILS ── */
+const $=id=>document.getElementById(id);
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2300);}
+function openM(h,wide=false){const b=$('mb');b.className='mb'+(wide?' w':'');b.innerHTML=h;$('mo').classList.remove('hid');}
+function closeM(){$('mo').classList.add('hid');}
+function closeMbg(e){if(e.target===$('mo'))closeM();}
+function tog(el){el.classList.toggle('on');}
+function togSw(el){el.classList.toggle('on');}
+
+function wframe(url,c){
+  return `<div class="wf"><div class="wch"><div style="display:flex;gap:4px;"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="wu">${url}</div></div>${c}</div>`;
+}
+function anav(brand,links,active,extra='',profileFn){
+  const ls=links.map(([id,lbl,sc])=>`<span class="anl ${active===id?'on':''}" onclick="showSA('${id}',null)">${lbl}</span>`).join('');
+  return `<div class="anav"><div class="anavbrand"><div class="anavlogo">${brand[0]}</div>${brand}</div><div class="anavlinks">${ls}</div><div class="anavr">${extra}<div class="avt" onclick="${profileFn}"></div></div></div>`;
+}
+function stars(r=0,sz=12){
+  return `<div style="display:flex;gap:2px;">${[1,2,3,4,5].map(n=>`<svg width="${sz}" height="${sz}" viewBox="0 0 20 20" fill="${n<=r?'#F59E0B':'#D1D5DB'}"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>`).join('')}</div>`;
+}
+
+/* ── SUPER ADMIN ── */
+function showSA(s,btn){
+  document.querySelectorAll('.sn').forEach(b=>b.classList.remove('on'));
+  btn?.classList.add('on');renderSA(s);
+}
+function renderSA(s){
+  const c=$('sa-c');if(!c)return;
+  const m={login:saLogin,sa_register:saSAregister,sa_profile:saProfile,dash:saDash,setup:saSetup,overlays:saOverlays,gif_tpl:saGifTpl,attract_lib:saAttractLib,analytics:saAnalytics,library:saLibrary,roles:saRoles,client_admins:saClientAdmins,event_managers:saEventManagers};
+  c.innerHTML=`<div style="width:100%;max-width:900px;">${(m[s]||saLogin)()}</div>`;
+}
+
+const saN=(a)=>anav('NAME',[['dash','Events','SA'],['analytics','Analytics','SA'],['library','Library','SA'],['roles','Roles','SA']],a,`<div class="wbtn" onclick="openSAEvent('')" style="margin-right:6px;">+ New Event</div>`,"showSA('sa_profile',null)");
+
+function saProfile(){return wframe('super-admin.Name.com/profile',saN('sa_profile')+`
+<div class="wc">
+  <div class="h2" style="margin-bottom:20px;">Account Settings</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div>
+      <div class="card" style="margin-bottom:14px;">
+        <div class="h3" style="margin-bottom:14px;">Profile</div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--bl),var(--re));flex-shrink:0;cursor:pointer;" onclick="toast('Upload photo')"></div>
+          <div><div style="font-size:12px;font-weight:700;">Super Admin</div><div class="mu" style="font-size:10px;margin-top:2px;">admin@NAME.com</div><span class="p prd" style="margin-top:4px;">Super Admin</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="g2"><div><div class="lbl">First name</div><input class="inp" style="margin-top:4px;" value="Admin"/></div><div><div class="lbl">Last name</div><input class="inp" style="margin-top:4px;" value="User"/></div></div>
+          <div><div class="lbl">Email</div><input class="inp" style="margin-top:4px;" value="admin@NAME.com" type="email"/></div>
+          <div class="btn bfu" style="border-radius:8px;" onclick="toast('Profile saved ✓')">Save Changes</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="h3" style="margin-bottom:14px;">Security</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div><div class="lbl">Current password</div><input class="inp" style="margin-top:4px;" type="password" placeholder="••••••••"/></div>
+          <div><div class="lbl">New password</div><input class="inp" style="margin-top:4px;" type="password" placeholder="••••••••"/></div>
+          <div style="border-top:1px solid var(--bd);padding-top:12px;margin-top:4px;">
+            <div class="lbl" style="margin-bottom:8px;">Platform Logo</div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="width:56px;height:56px;border-radius:12px;background:var(--bl);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:var(--mn);color:#fff;cursor:pointer;border:2px dashed rgba(255,255,255,.3);" onclick="toast('Upload company logo')">LOGO</div>
+              <div>
+                <div style="font-size:11px;font-weight:600;margin-bottom:2px;">NAME</div>
+                <div style="font-size:9px;color:var(--mu);">PNG or SVG · min 200x200px</div>
+                <div class="btn bgh" style="border-radius:5px;padding:3px 8px;font-size:9px;margin-top:5px;" onclick="toast('Upload logo')">Upload</div>
+              </div>
+            </div>
+          </div>
+          <div><div class="lbl">2FA</div><div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;"><span style="font-size:11px;color:var(--mu);">Authenticator app</span><div class="sw on" onclick="togSw(this)"></div></div></div>
+          <div class="btn bgh bfu" style="border-radius:8px;" onclick="toast('Password updated ✓')">Update Password</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:14px;">
+        <div class="h3" style="margin-bottom:14px;">Notifications</div>
+        <div style="display:flex;flex-direction:column;">
+          <div class="tog"><div class="tinf"><div class="tlbl">New client accounts</div><div class="tsub">When a new client registers</div></div><div class="sw on" onclick="togSw(this)"></div></div>
+          <div class="tog"><div class="tinf"><div class="tlbl">Platform milestones</div><div class="tsub">Total photos, events, shares</div></div><div class="sw on" onclick="togSw(this)"></div></div>
+          <div class="tog"><div class="tinf"><div class="tlbl">Privacy flags</div><div class="tsub">Unusual activity across platform</div></div><div class="sw on" onclick="togSw(this)"></div></div>
+          <div class="tog"><div class="tinf"><div class="tlbl">System errors</div><div class="tsub">API failures, upload errors</div></div><div class="sw on" onclick="togSw(this)"></div></div>
+          <div class="tog"><div class="tinf"><div class="tlbl">Weekly platform report</div><div class="tsub">Every Monday by email</div></div><div class="sw on" onclick="togSw(this)"></div></div>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:14px;">
+        <div class="h3" style="margin-bottom:14px;">Platform Settings</div>
+        <div style="display:flex;flex-direction:column;">
+          <div class="tog"><div class="tinf"><div class="tlbl">Maintenance mode</div><div class="tsub">Take platform offline for updates</div></div><div class="sw" onclick="togSw(this)"></div></div>
+          <div class="tog"><div class="tinf"><div class="tlbl">New client self-signup</div><div class="tsub">Allow clients to register with code</div></div><div class="sw on" onclick="togSw(this)"></div></div>
+          <div class="tog"><div class="tinf"><div class="tlbl">Debug logging</div><div class="tsub">Verbose logs for troubleshooting</div></div><div class="sw" onclick="togSw(this)"></div></div>
+        </div>
+      </div>
+      <div class="btn bgh bfu" style="border-radius:8px;border-color:var(--re);color:var(--re);" onclick="showSA('login',null);toast('Signed out')">Sign Out</div>
+    </div>
+  </div>
+</div>`);}
+
+function saLogin(){return wframe('super-admin.Name.com/login',`
+<div class="wc" style="max-width:380px;margin:40px auto;">
+  <div style="text-align:center;margin-bottom:24px;"><div class="lbl" style="color:var(--re);margin-bottom:6px;">Super Admin</div><div class="h2">Sign in</div></div>
+  <div style="display:flex;border:1.5px solid var(--bd);border-radius:8px;overflow:hidden;margin-bottom:16px;">
+    <div id="sa-tpw" style="flex:1;text-align:center;padding:8px;font-size:11px;font-weight:600;background:var(--bl);color:#fff;cursor:pointer;" onclick="saLM('pw')">Email &amp; Password</div>
+    <div id="sa-tco" style="flex:1;text-align:center;padding:8px;font-size:11px;font-weight:600;background:transparent;color:var(--mu);cursor:pointer;" onclick="saLM('code')">Invite Code</div>
+  </div>
+  <div id="sa-pw" style="display:flex;flex-direction:column;gap:12px;">
+    <div><div class="lbl">Email</div><input class="inp" style="margin-top:4px;" placeholder="admin@NAME.com" type="email"/></div>
+    <div><div class="lbl">Password</div><input class="inp" style="margin-top:4px;" placeholder="••••••••" type="password"/></div>
+    <div class="btn bfu" style="border-radius:8px;padding:11px;" onclick="showSA('dash',null)">Sign In</div>
+  </div>
+  <div id="sa-co" style="display:none;flex-direction:column;gap:12px;">
+    <div><div class="lbl">8-digit invite code</div><div style="display:flex;gap:5px;margin-top:6px;">${[...'SA193847'].map(ch=>`<div style="flex:1;aspect-ratio:1;background:#fff;border:2px solid var(--bd);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;font-family:var(--mn);">${ch}</div>`).join('')}</div></div>
+    <div class="btn bfu" style="border-radius:8px;padding:11px;" onclick="showSA('sa_register',null)">Verify Code →</div>
+    <div style="text-align:center;font-size:10px;color:var(--mu);margin-top:4px;">First time? You'll set up your account after verifying.</div>
+  </div>
+</div>`);} 
+function saLM(m){const p=m==='pw';['sa-tpw','sa-tco'].forEach((id,i)=>{const el=document.getElementById(id);if(el){el.style.background=((i===0&&p)||(i===1&&!p))?'var(--bl)':'transparent';el.style.color=((i===0&&p)||(i===1&&!p))?'#fff':'var(--mu)';}});const pw=document.getElementById('sa-pw');const co=document.getElementById('sa-co');if(pw)pw.style.display=p?'flex':'none';if(co)co.style.display=!p?'flex':'none';}
+
+function saSAregister(){return wframe('super-admin.Name.com/setup',`
+<div class="wc" style="max-width:420px;margin:40px auto;">
+  <div style="text-align:center;margin-bottom:24px;"><div class="lbl" style="color:var(--gr);margin-bottom:6px;">✓ Code verified</div><div class="h2">Set up your account</div></div>
+  <div style="display:flex;flex-direction:column;gap:12px;">
+    <div class="g2">
+      <div><div class="lbl">First name</div><input class="inp" style="margin-top:4px;" placeholder="Admin"/></div>
+      <div><div class="lbl">Last name</div><input class="inp" style="margin-top:4px;" placeholder="User"/></div>
+    </div>
+    <div><div class="lbl">Email</div><input class="inp" style="margin-top:4px;" placeholder="admin@NAME.com" type="email"/></div>
+    <div><div class="lbl">Set a password</div><input class="inp" style="margin-top:4px;" placeholder="••••••••" type="password"/></div>
+    <div><div class="lbl">Confirm password</div><input class="inp" style="margin-top:4px;" placeholder="••••••••" type="password"/></div>
+    <div class="btn bfu" style="border-radius:8px;padding:11px;" onclick="showSA('dash',null)">Create Account →</div>
+  </div>
+</div>`);}
+
+function saDash(){return wframe('super-admin.Name.com/dashboard',`
+${saN('dash')}
+<div class="wc">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;"><div class="h2">All Events</div></div>
+  <div class="g3" style="margin-bottom:20px;">
+    ${[['12','Active Events'],['2.4k','Total Sessions'],['8','Clients']].map(([v,l])=>`<div class="card" style="text-align:center;"><div style="font-size:22px;font-weight:700;">${v}</div><div class="lbl" style="margin:4px 0 0;">${l}</div></div>`).join('')}
+  </div>
+  ${[{name:'Company A: Annual Gala 2026',meta:'48 sessions · 112 shares · Live',sc:'pg',col:'#1E8A4C'},{name:'Company B: Product Launch',meta:'0 sessions · Upcoming',sc:'pa',col:'#C2410C'},{name:'Company A: Year-End Party',meta:'134 sessions · Ended',sc:'pgr',col:'#475569',dim:true}].map(ev=>`
+  <div data-name="${ev.name}" style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg);border:1.5px solid var(--bd);border-radius:9px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;${ev.dim?'opacity:.55':''}" onmouseover="this.style.borderColor='var(--bl)'" onmouseout="this.style.borderColor='var(--bd)'" onclick="openSAEvent('${ev.name}')">
+    <div style="width:10px;height:10px;border-radius:50%;background:${ev.col};flex-shrink:0;"></div>
+    <div style="flex:1;"><div style="font-size:12px;font-weight:700;">${ev.name}</div><div style="font-size:10px;color:var(--mu);font-family:var(--mn);margin-top:2px;">${ev.meta}</div></div>
+    <span class="p ${ev.sc}">${ev.sc==='pg'?'Live':ev.sc==='pa'?'Upcoming':'Ended'}</span>
+    <div class="btn bgh" style="border-radius:6px;padding:5px 10px;font-size:9px;" onclick="event.stopPropagation();openSAEvent('${ev.name}')">Manage →</div>
+  </div>`).join('')}
+</div>`);}
+
+let saTab='details';
+
+function openSAEvent(name){
+  currentEvent = {name: name, isNew: name===''};
+  showSA('setup', null);
+}
+
+function saSetup(){saTab='details';
+const title = currentEvent.isNew ? 'New Event' : currentEvent.name;
+return wframe('admin.NAME.com/events/1/setup',`
+${saN('dash')}
+<div class="wc">
+  <div class="h2" style="margin-bottom:4px;">${title} - Setup</div>
+  <div class="mu" style="margin-bottom:16px;">Full event setup + Super Admin–only AI configuration.</div>
+  <div class="ptabs" id="sa-ptabs">
+    ${[['details','1. Details'],['overlay','2. Overlays'],['gif','3. GIF Builder'],['attract','4. Attract Screen'],['ai_config','5. AI Config ★'],['sharing','6. Sharing'],['survey','7. Survey Builder'],['preview','8. Preview']].map(([id,lbl],i)=>`<div class="ptab ${i===0?'on':''}" onclick="saSwitchTab('${id}',this)">${lbl}</div>`).join('')}
+  </div>
+  <div id="sa-tab-c">${saTabDetails()}</div>
+</div>`);}
+function saSwitchTab(id,btn){
+  saTab=id;
+  document.querySelectorAll('#sa-ptabs .ptab').forEach(b=>b.classList.remove('on'));
+  btn?.classList.add('on');
+  const m={details:saTabDetails,overlay:saTabOverlay,gif:saTabGif,attract:saTabAttract,ai_config:saTabAI,sharing:saTabSharing,survey:saTabSurvey,preview:saTabPreview};
+  const el=document.getElementById('sa-tab-c');if(el)el.innerHTML=(m[id]||saTabDetails)();
+}
+function saNext(id){saSwitchTab(id,document.querySelector(`#sa-ptabs .ptab:nth-child(${['details','overlay','gif','attract','ai_config','sharing','survey','preview'].indexOf(id)+1})`));}
+
+function saTabDetails(){return `<div style="display:flex;flex-direction:column;gap:12px;max-width:600px;">
+  <div><div class="lbl">Event Name</div><input id="event-name-inp" class="inp" style="font-size:12px;font-weight:600;margin-top:4px;" placeholder="Enter event name…" value="${currentEvent.isNew ? '' : currentEvent.name}" oninput="currentEvent.name=this.value;currentEvent.isNew=false;"/></div>
+  <div><div class="lbl">Company Name</div><div class="inp" style="margin-top:4px;color:var(--mu);">Company A</div></div>
+  <div class="g2"><div><div class="lbl">Start</div><div class="inp" style="margin-top:4px;color:var(--mu);">15 Mar 2026</div></div><div><div class="lbl">End</div><div class="inp" style="margin-top:4px;color:var(--mu);">15 Mar 2026</div></div></div>
+  <div><div class="lbl">Description</div><div class="inp" style="margin-top:4px;color:var(--mu);">Add Description</div></div>
+  <div style="display:flex;gap:10px;margin-top:4px;"><div class="btn bgh" style="border-radius:7px;padding:10px 18px;" onclick="showSA('dash',null)">Cancel</div><div class="btn" style="border-radius:7px;padding:10px 22px;" onclick="saNext('overlay')">Next →</div></div>
+</div>`;}
+
+function saTabOverlay(){
+  const ovls=[{l:'Company Logo Frame',t:'Static',c:'#1A237E',on:true},{l:'Golden Border',t:'Animated',c:'#7C3AED'},{l:'Congratulations',t:'Static',c:'#1A7A42'},{l:'Happy Birthday',t:'GIF Overlay',c:'#C2410C'},{l:'Branded Frame',t:'Static',c:'#141412'},{l:'Sparkle Transition',t:'Video Overlay',c:'#0369A1'}];
+  return `
+<div style="display:flex;flex-direction:column;gap:16px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+    <div><div class="h3">Overlay Studio</div></div>
+    <div style="display:flex;gap:8px;"><div class="btn bgh" style="border-radius:7px;padding:7px 11px;font-size:10px;" onclick="openOvBuilder()">+ Build</div><div class="btn bgh" style="border-radius:7px;padding:7px 11px;font-size:10px;" onclick="openOvUpload()">↑ Upload</div></div>
+  </div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;" id="sa-ov-f">
+    ${['All','Static','Animated','GIF Overlays','Video Overlays'].map((f,i)=>`<div class="fp ${i===0?'on':''}" onclick="filterOv(this,'${f}','sa-ov-g')">${f}</div>`).join('')}
+  </div>
+  <div class="g3" id="sa-ov-g">
+    ${ovls.map(ov=>`<div data-t="${ov.t}" style="border:1.5px solid ${ov.on?'var(--bl)':'var(--bd)'};border-radius:10px;overflow:hidden;cursor:pointer;" onclick="toast('${ov.l}')">
+      <div style="height:76px;background:linear-gradient(135deg,${ov.c},${ov.c}88);display:flex;align-items:center;justify-content:center;position:relative;"><div style="font-size:9px;font-family:var(--mn);color:rgba(255,255,255,.5);">PREVIEW</div>${ov.on?`<div style="position:absolute;top:5px;right:5px;background:var(--bl);border-radius:3px;padding:1px 5px;font-size:7px;font-family:var(--mn);color:#fff;">ACTIVE</div>`:''}</div>
+      <div style="padding:8px 9px;background:var(--bg);"><div style="font-size:10px;font-weight:600;">${ov.l}</div><div style="font-size:8px;font-family:var(--mn);color:var(--mu);margin-top:2px;">${ov.t}</div></div>
+    </div>`).join('')}
+  </div>
+  <div style="display:flex;gap:10px;"><div class="btn bgh" style="border-radius:7px;padding:10px 18px;" onclick="saNext('details')">← Back</div><div class="btn" style="border-radius:7px;padding:10px 22px;" onclick="saNext('gif')">Next →</div></div>
+</div>`;}
+
+function filterOv(btn,type,gridId){
+  const par=btn.closest('[id]');
+  if(par){par.querySelectorAll('.fp').forEach(p=>p.classList.remove('on'));}
+  btn.classList.add('on');
+  const g=document.getElementById(gridId);
+  if(g)g.querySelectorAll('[data-t]').forEach(c=>{c.style.display=(type==='All'||c.dataset.t===type)?'':'none';});
+  toast('Filter: '+type);
+}
+
+function saTabGif(){
+  const base=`
+<div style="display:flex;flex-direction:column;gap:16px;">
+  <div><div class="h3">GIF Builder</div><div class="mu" style="margin-top:2px;">Set animation mode.</div></div>
+  <div class="g2" id="sa-gif-modes">
+    <div id="sa-gm-s" style="border:2px solid var(--bl);border-radius:12px;padding:16px;cursor:pointer;background:var(--bll);" onclick="saGifMode('s')">
+      <div style="font-size:12px;font-weight:700;color:var(--bl);">AI Transformation</div>
+      <div class="mu" style="margin-top:4px;font-size:10px;">One photo → AI animates transformation</div>
+      <div style="font-size:9px;font-family:var(--mn);color:var(--bl);margin-top:8px;">● SELECTED</div>
+    </div>
+    <div id="sa-gm-m" style="border:2px solid var(--bd);border-radius:12px;padding:16px;cursor:pointer;" onclick="saGifMode('m')">
+      <div style="font-size:12px;font-weight:700;">GIF Multi-Shot</div>
+      <div class="mu" style="margin-top:4px;font-size:10px;">Multiple frames → loop (exactly like Instagram)</div>
+      <div style="font-size:9px;font-family:var(--mn);color:var(--mu);margin-top:8px;">○ Click to select</div>
+    </div>
+  </div>
+  <div id="sa-gs-s" style="display:flex;flex-direction:column;gap:12px;">
+    <div class="card">
+      <div class="h3" style="margin-bottom:10px;">AI Transformation</div>
+      <div class="tog"><div class="tinf"><div class="tlbl">Show transformation steps</div><div class="tsub">Animate: original → bg remove → outfit → final</div></div><div class="sw on" onclick="tog(this)"></div></div>
+      <div class="tog"><div class="tinf"><div class="tlbl">Loop continuously</div><div class="tsub">Cycles back to original on repeat</div></div><div class="sw" onclick="tog(this)"></div></div>
+      <div style="margin-top:10px;"><div class="lbl" style="margin-bottom:6px;">Speed</div><div style="display:flex;gap:6px;">${['Slow','Normal','Fast'].map((s,i)=>`<div style="padding:5px 10px;border-radius:5px;border:1.5px solid ${i===1?'var(--bl)':'var(--bd)'};font-size:9px;cursor:pointer;background:${i===1?'var(--bll)':'transparent'};color:${i===1?'var(--bl)':'var(--mu)'};" onclick="toast('Speed: ${s}')">${s}</div>`).join('')}</div></div>
+    </div>
+  </div>
+  <div id="sa-gs-m" style="display:none;flex-direction:column;gap:12px;">
+    <div class="card">
+      <div class="h3" style="margin-bottom:10px;">Multi-Shot Settings</div>
+      <div style="margin-bottom:12px;">
+        <div class="lbl" style="margin-bottom:6px;">Number of frames</div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;">${[2,3,4,5,6,8,10,12].map(n=>`<div style="width:36px;height:36px;border-radius:7px;border:1.5px solid ${n===4?'var(--bl)':'var(--bd)'};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;cursor:pointer;background:${n===4?'var(--bll)':'transparent'};color:${n===4?'var(--bl)':'var(--ink)'};" onclick="toast('${n} frames selected')">${n}</div>`).join('')}</div>
+      </div>
+      <div class="tog"><div class="tinf"><div class="tlbl">Loop</div><div class="tsub">F1→F2→F3→F4, pause 1s → repeat</div></div><div class="sw on" onclick="tog(this)"></div></div>
+      <div class="tog"><div class="tinf"><div class="tlbl">AI enhancement per frame</div><div class="tsub">Apply AI transforms to each captured frame</div></div><div class="sw on" onclick="tog(this)"></div></div>
+      <div style="margin-top:10px;"><div class="lbl" style="margin-bottom:6px;">Timer per frame (seconds)</div><div style="display:flex;gap:5px;">${[2,3,5,7,10].map(n=>`<div style="width:36px;height:36px;border-radius:7px;border:1.5px solid ${n===3?'var(--bl)':'var(--bd)'};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;cursor:pointer;background:${n===3?'var(--bll)':'transparent'};color:${n===3?'var(--bl)':'var(--ink)'};" onclick="toast('Timer: ${n}s')">${n}s</div>`).join('')}</div></div>
+      <div style="margin-top:10px;"><div class="lbl" style="margin-bottom:6px;">Output format</div><div style="display:flex;gap:6px;">${['GIF','MP4','GIF + MP4'].map((s,i)=>`<div style="padding:5px 10px;border-radius:5px;border:1.5px solid ${i===2?'var(--bl)':'var(--bd)'};font-size:9px;cursor:pointer;background:${i===2?'var(--bll)':'transparent'};color:${i===2?'var(--bl)':'var(--mu)'};" onclick="toast('Format: ${s}')">${s}</div>`).join('')}</div></div>
+    </div>
+    <div class="card" style="background:var(--bll);border-color:#A5B4FC;">
+      <div style="font-size:11px;font-weight:700;color:var(--bl);margin-bottom:6px;">How works</div>
+      <div style="font-size:10px;color:var(--bl);">Plays frames forward: F1→F2→F3→F4, pauses 1 second, then loops back to F1. Continues forward and repeats - no reverse playback.</div>
+    </div>
+  </div>
+  <!-- Super Admin Lock -->
+  <div class="card" style="margin-top:12px;background:#0C1525;border-color:#1E3A6E;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span class="p pr">Super Admin Only</span><div class="h3" style="color:#93C5FD;">Global Frame Lock</div></div>
+    <div class="tog" style="border-color:#1E3A6E;">
+      <div class="tinf"><div class="tlbl" style="color:#93C5FD;">Lock frame count for all clients</div><div class="tsub" style="color:#4B72A8;">Prevent Client Admins from changing frame count</div></div>
+      <div class="sw" onclick="tog(this)"></div>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;"><div class="btn bgh" style="border-radius:7px;padding:10px 18px;" onclick="saNext('overlay')">← Back</div><div class="btn" style="border-radius:7px;padding:10px 22px;" onclick="saNext('attract')">Next →</div></div>
+</div>`;
+  return base;
+}
+function saGifMode(m){
+  const isSingle=m==='s';
+  ['sa-gm-s','sa-gm-m'].forEach((id,i)=>{
+    const el=$(id);if(!el)return;
+    const isThis=(i===0&&isSingle)||(i===1&&!isSingle);
+    el.style.border=`2px solid ${isThis?'var(--bl)':'var(--bd)'}`;
+    el.style.background=isThis?'var(--bll)':'transparent';
+    el.querySelector('div:last-child').textContent=isThis?'● SELECTED':'○ Click to select';
+    el.querySelector('div:last-child').style.color=isThis?'var(--bl)':'var(--mu)';
+  });
+  $('sa-gs-s').style.display=isSingle?'flex':'none';
+  $('sa-gs-m').style.display=!isSingle?'flex':'none';
+}
+
+function saTabAttract(){return `
+<div style="display:flex;flex-direction:column;gap:16px;">
+  <div><div class="h3">Attract Screen</div><div class="mu" style="margin-top:2px;">Full-screen idle display.</div></div>
+  <div class="g2" style="align-items:start;">
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div><div class="lbl" style="margin-bottom:8px;">Template</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          ${['Brand Dark','Brand Light','Minimal','Custom'].map((s,i)=>`<div style="height:66px;border-radius:8px;background:${['linear-gradient(135deg,#0C0E1A,#1A237E)','linear-gradient(135deg,#F4F3EF,#E2E5F0)','#F4F3EF','var(--bd)'][i]};border:${i===0?'2px solid var(--bl)':'1.5px solid var(--bd)'};cursor:pointer;display:flex;align-items:center;justify-content:center;" onclick="toast('${s} selected')"><div style="font-size:8px;font-family:var(--mn);color:${i===1?'var(--mu)':'rgba(255,255,255,.5)'};">${s}</div></div>`).join('')}
+        </div>
+      </div>
+      <div class="upl" onclick="toast('Upload PNG or MP4')"><svg width="18" height="18" viewBox="0 0 22 22" fill="none"><path d="M11 4v14M4 11h14" stroke="var(--mu)" stroke-width="1.8" stroke-linecap="round"/></svg><div style="font-size:10px;color:var(--mu);">Upload still or looping video</div><div style="font-size:8px;font-family:var(--mn);color:var(--mu);">PNG · MP4 · Max 20MB</div></div>
+      <div><div class="lbl">Idle message</div><div class="inp" style="margin-top:4px;">Tap anywhere to begin ✨</div></div>
+      <div><div class="lbl">Countdown timer per capture</div>
+        <div style="display:flex;gap:5px;margin-top:4px;">${[3,5,7,10].map(n=>`<div style="width:36px;height:36px;border-radius:7px;border:1.5px solid ${n===3?'var(--bl)':'var(--bd)'};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;cursor:pointer;background:${n===3?'var(--bll)':'transparent'};color:${n===3?'var(--bl)':'var(--ink)'};" onclick="toast('Timer: ${n}s')">${n}s</div>`).join('')}</div>
+      </div>
+    </div>
+    <div>
+      <div class="lbl" style="margin-bottom:8px;">Live Preview</div>
+      <div style="background:linear-gradient(148deg,#0C0E1A,#1A237E);border-radius:10px;height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;">
+        <div style="width:36px;height:36px;background:rgba(255,255,255,.12);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:var(--mn);color:#fff;">CA</div>
+        <div style="font-size:13px;font-weight:700;color:#fff;">Annual Gala 2026</div>
+        <div style="font-size:9px;color:rgba(255,255,255,.38);font-family:var(--mn);">Tap anywhere to begin ✨</div>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;"><div class="btn bgh" style="border-radius:7px;padding:10px 18px;" onclick="saNext('gif')">← Back</div><div class="btn" style="border-radius:7px;padding:10px 22px;" onclick="saNext('ai_config')">Next: AI Config →</div></div>
+</div>`;}
+
+function saTabAI(){return `
+<div style="display:flex;flex-direction:column;gap:16px;max-width:620px;">
+  <div style="display:flex;align-items:center;gap:8px;"><span class="p pr">Super Admin Only</span><div class="h2">AI Configuration</div></div>
+  <div class="mu">AI quality, themes and prompt engineering. Not visible to Client Admins.</div>
+
+  <div class="card">
+    <div class="h3" style="margin-bottom:10px;">AI Output Settings</div>
+    ${[['Output quality','High (4K)'],['Background removal','Auto AI'],['Outfit transformation','Enabled'],['Face preservation','Strict'],['Default frame count','4 (override below)']].map(([l,v])=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bd);"><span style="font-size:11px;font-weight:600;">${l}</span><span style="font-size:10px;color:var(--bl);font-family:var(--mn);cursor:pointer;" onclick="toast('Edit: '+l)">${v} →</span></div>`).join('')}
+  </div>
+
+  <div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div class="h3">Available Themes</div>
+      <div class="btn bgh" style="border-radius:6px;padding:5px 11px;font-size:10px;" onclick="openAddTheme()">+ Add Theme</div>
+    </div>
+    <div class="g3">
+      ${(function(){var themes=[{l:'Ballroom Gala',c:'#1A237E',on:true},{l:'Rooftop Night',c:'#1A7A42',on:true},{l:'Garden Party',c:'#6D28D9',on:false},{l:'Futuristic',c:'#0369A1',on:false},{l:'Black Tie',c:'#141412',on:true},{l:'Art Deco',c:'#B45309',on:false}];return themes.map(function(t){return '<div style="border:1.5px solid '+(t.on?'var(--bl)':'var(--bd)')+';border-radius:9px;overflow:hidden;cursor:pointer;" onclick="toast(\'Toggle '+t.l+'\')"><div style="height:46px;background:linear-gradient(135deg,'+t.c+','+t.c+'88);"></div><div style="padding:7px 8px;background:var(--bg);display:flex;align-items:center;justify-content:space-between;"><div style="font-size:9px;font-weight:600;">'+t.l+'</div><div class="sw '+(t.on?'on':'')+'" style="width:26px;height:16px;" onclick="tog(this)"></div></div></div>';}).join('');})()}
+    </div></div>
+
+  <div class="card" style="background:linear-gradient(135deg,#1A1C28,#252840);border:none;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+      <div style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:14px;">🍌</div>
+      <div><div style="font-size:12px;font-weight:700;color:#fff;">Nano Banana Prompt Engineering</div><div style="font-size:9px;color:rgba(255,255,255,.5);font-family:var(--mn);margin-top:2px;">Controls how the AI generates transformations</div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div><div style="font-size:10px;font-weight:600;color:rgba(255,255,255,.7);margin-bottom:4px;">Theme Injection Template</div><textarea style="width:100%;min-height:44px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:7px;padding:8px 10px;font-size:10px;color:#fff;font-family:var(--mn);resize:vertical;box-sizing:border-box;">Transform the subject into {{theme_name}} style. Setting: {{theme_description}}. Maintain photorealism and subject identity.</textarea></div>
+      <div><div style="font-size:10px;font-weight:600;color:rgba(255,255,255,.7);margin-bottom:4px;">Negative Prompt</div><textarea style="width:100%;min-height:44px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:7px;padding:8px 10px;font-size:10px;color:#fff;font-family:var(--mn);resize:vertical;box-sizing:border-box;">blurry, distorted face, extra limbs, bad anatomy, watermark, text overlay, low quality, pixelated</textarea></div>
+      <div><div style="font-size:10px;font-weight:600;color:rgba(255,255,255,.7);margin-bottom:4px;">Settings & Focus</div><textarea style="width:100%;min-height:44px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:7px;padding:8px 10px;font-size:10px;color:#fff;font-family:var(--mn);resize:vertical;box-sizing:border-box;">CFG 13-14, realism high, denoising 0.3-0.4, composition lock, pose preservation high, cinematic mode</textarea></div>
+      <div><div style="font-size:10px;font-weight:600;color:rgba(255,255,255,.7);margin-bottom:4px;">Chain-of-Thought Steps</div><div style="display:flex;flex-direction:column;gap:5px;">${(function(){return['1. Detect and preserve face landmarks','2. Remove background with masking','3. Apply theme environment','4. Transform outfit per theme style','5. Composite and relight','6. Quality check + upscale'].map(function(s){return '<div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.04);border-radius:5px;padding:5px 8px;"><span style="font-size:9px;font-family:var(--mn);color:rgba(255,255,255,.6);">'+s+'</span></div>';}).join('');})()}</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="h3" style="margin-bottom:10px;">Backend API Config</div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div><div class="lbl" style="margin-bottom:4px;">API Endpoint</div><div class="inp" style="font-family:var(--mn);font-size:10px;color:var(--mu);">https://api.NAME.io/v2/transform</div></div>
+      <div><div class="lbl" style="margin-bottom:4px;">API Key</div><div class="inp" style="font-family:var(--mn);font-size:10px;color:var(--mu);">sk-ea-••••••••••••••••••••••••••••</div></div>
+      <div class="g2"><div><div class="lbl" style="margin-bottom:4px;">Timeout (ms)</div><div class="inp" style="font-family:var(--mn);font-size:10px;">15000</div></div><div><div class="lbl" style="margin-bottom:4px;">Max retries</div><div class="inp" style="font-family:var(--mn);font-size:10px;">3</div></div></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-top:1px solid var(--bd);"><div><div style="font-size:11px;font-weight:600;">Fallback to static photo on failure</div><div style="font-size:9px;color:var(--mu);">Delivers original photo if AI times out</div></div><div class="sw on" onclick="tog(this)"></div></div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:10px;margin-top:4px;"><div class="btn bgh" style="border-radius:7px;padding:10px 18px;" onclick="saNext('attract')">← Back</div><div class="btn" style="border-radius:7px;padding:10px 22px;" onclick="saNext('sharing')">Next: Sharing →</div></div>
+</div>`;}
+
+function saTabSharing(){return `
+<div style="display:flex;flex-direction:column;gap:16px;max-width:600px;">
+  <div><div class="h3">Sharing Options</div><div class="mu" style="margin-top:2px;">Toggle which methods attendees see on the share screen.</div></div>
+  ${[{l:'Email',s:'Send to guest email',on:true},{l:'SMS',s:'Send via text message',on:true},{l:'WhatsApp',s:'Send via WhatsApp',on:true},{l:'QR Code',s:'Guest scans to download instantly',on:true},{l:'AirDrop',s:'iOS nearby sharing (iPad only)',on:false}].map(m=>`
+  <div class="tog"><div class="tinf"><div class="tlbl">${m.l}</div><div class="tsub">${m.s}</div></div><div class="sw ${m.on?'on':''}" onclick="tog(this)"></div></div>`).join('')}
+  <div class="hr"></div>
+  <div class="h3" style="margin-bottom:10px;">Email Template</div>
+  <div style="display:flex;flex-direction:column;gap:10px;">
+    <div><div class="lbl">Subject</div><input class="inp" style="margin-top:4px;" value="Your photo from Annual Gala 2026 🎉"/></div>
+    <div><div class="lbl">Footer message</div><input class="inp" style="margin-top:4px;" value="Thank you for being part of the evening!"/></div>
+  </div>
+  <div style="display:flex;gap:10px;margin-top:4px;">
+    <div class="btn bgh" style="border-radius:7px;padding:10px 18px;" onclick="saNext('ai_config')">← Back</div>
+    <div class="btn" style="border-radius:7px;padding:10px 22px;" onclick="saNext('survey')">Next: Survey Builder →</div>
+  </div>
+</div>`;}
+
+function saTabSurvey(){return `
+<div style="display:flex;flex-direction:column;gap:16px;max-width:600px;">
+  <div><div class="h3">Survey Builder</div><div class="mu" style="margin-top:2px;">Optional feedback on the share screen. Fully skippable by guests.</div></div>
+  <div class="tog"><div class="tinf"><div class="tlbl">Enable Guest Survey</div><div class="tsub">Shown on the share screen - guests can skip</div></div><div class="sw on" onclick="tog(this)"></div></div>
+  <div class="g2" style="align-items:start;">
+    <div><div class="lbl" style="margin-bottom:8px;">Available Fields</div>
+      ${['⭐ Star Rating','📝 Comment','📧 Email Capture','📱 Phone Number','👍 Yes / No'].map(f=>`<div style="padding:9px 12px;background:var(--bg);border:1.5px solid var(--bd);border-radius:7px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;" onclick="toast('Added: ${f}')"><span>${f}</span><span style="font-size:10px;color:var(--bl);font-weight:600;">+ Add</span></div>`).join('')}
+    </div>
+    <div><div class="lbl" style="margin-bottom:8px;">Your Survey</div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;">
+        ${['⭐ Star Rating (shown inline)','📧 Email Capture'].map(f=>`<div style="padding:9px 12px;background:#fff;border:1.5px solid var(--bl);border-radius:7px;font-size:11px;display:flex;align-items:center;justify-content:space-between;"><span>${f}</span><span style="font-size:10px;color:var(--re);cursor:pointer;" onclick="toast('Removed')">✕</span></div>`).join('')}
+        <div style="padding:9px 12px;background:var(--bg);border:2px dashed var(--bd);border-radius:7px;font-size:10px;color:var(--mu);text-align:center;">+ Add fields from left</div>
+      </div>
+      <div class="lbl" style="margin-bottom:6px;">Show timing</div>
+      <div style="display:flex;gap:6px;">${['During Sharing','After Sharing'].map((t,i)=>`<div style="padding:5px 9px;border-radius:5px;border:1.5px solid ${i===0?'var(--bl)':'var(--bd)'};font-size:9px;cursor:pointer;background:${i===0?'var(--bll)':'transparent'};color:${i===0?'var(--bl)':'var(--mu)'};" onclick="toast('${t}')">${t}</div>`).join('')}</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;margin-top:4px;">
+    <div class="btn bgh" style="border-radius:7px;padding:10px 18px;" onclick="saNext('sharing')">← Back</div>
+    <div class="btn" style="border-radius:7px;padding:10px 22px;" onclick="saNext('preview')">Next: Preview →</div>
+  </div>
+</div>`;}
+
+function openAddTheme(){toast('Add Theme: Enter theme name, description and preview colour');}
+
+function saTabPreview(){return `<div style="display:flex;flex-direction:column;gap:16px;max-width:700px;">
+  <div class="h3">Final Preview</div>
+  <div class="g2"><div><div class="lbl" style="margin-bottom:8px;">Banner</div><div style="background:#1A237E;border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;"><div style="width:40px;height:40px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;font-family:var(--mn);">CA</div><div><div style="font-size:8px;font-family:var(--mn);color:rgba(255,255,255,.4);text-transform:uppercase;">Company A</div><div style="font-size:14px;font-weight:700;color:#fff;">${currentEvent.name||'Untitled Event'}</div></div></div></div>
+    <div><div class="lbl" style="margin-bottom:8px;">Quick Link</div><div class="card"><div class="btn bfu" style="border-radius:7px;padding:8px;font-size:10px;" onclick="window.open('attendee.html','_blank');toast('Preview in Attendee View')">▶ Preview Attendee View</div></div></div>
+  </div>
+  <div class="card" style="background:var(--grl);border-color:#86EFAC;"><div style="font-size:11px;font-weight:700;color:var(--gr);margin-bottom:4px;">Ready</div><div style="font-size:10px;color:var(--gr);">✓ Details &nbsp;·&nbsp; ✓ Overlays &nbsp;·&nbsp; ✓ GIF &nbsp;·&nbsp; ✓ Attract &nbsp;·&nbsp; ✓ AI Config &nbsp;·&nbsp; ✓ Sharing &nbsp;·&nbsp; ✓ Survey</div></div>
+  <div style="display:flex;gap:10px;"><div class="btn bgh" style="border-radius:7px;padding:10px 18px;" onclick="saNext('survey')">← Back</div><div class="btn bgr" style="border-radius:7px;padding:10px 22px;" onclick="showSA('dash',null);toast('Event published ✓')">Publish ✓</div></div>
+</div>`;}
+
+function saLibrary(){return wframe('super-admin.Name.com/library',saN('library')+`
+<div class="wc">
+  <div class="h2" style="margin-bottom:4px;">Library</div>
+  <div class="mu" style="margin-bottom:20px;font-size:11px;">Global assets shared across all client accounts</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+    <div class="card" style="cursor:pointer;text-align:center;padding:20px 14px;" onclick="showSA('overlays',null)">
+      <div style="font-size:30px;margin-bottom:10px;">🖼</div>
+      <div class="h3" style="font-size:13px;margin-bottom:4px;">Overlays</div>
+      <div class="mu" style="font-size:10px;">Frames, logos, watermarks</div>
+      <div style="margin-top:12px;font-family:var(--mn);font-size:9px;color:var(--bl);">12 assets →</div>
+    </div>
+    <div class="card" style="cursor:pointer;text-align:center;padding:20px 14px;" onclick="showSA('gif_tpl',null)">
+      <div style="font-size:30px;margin-bottom:10px;">🎞</div>
+      <div class="h3" style="font-size:13px;margin-bottom:4px;">GIF Templates</div>
+      <div class="mu" style="font-size:10px;">Colour schemes &amp; loop styles</div>
+      <div style="margin-top:12px;font-family:var(--mn);font-size:9px;color:var(--bl);">6 templates →</div>
+    </div>
+    <div class="card" style="cursor:pointer;text-align:center;padding:20px 14px;" onclick="showSA('attract_lib',null)">
+      <div style="font-size:30px;margin-bottom:10px;">📺</div>
+      <div class="h3" style="font-size:13px;margin-bottom:4px;">Attract Screens</div>
+      <div class="mu" style="font-size:10px;">Idle &amp; welcome screen templates</div>
+      <div style="margin-top:12px;font-family:var(--mn);font-size:9px;color:var(--bl);">8 screens →</div>
+    </div>
+  </div>
+</div>`);}
+
+function saOverlays(){
+  const ovs=[{l:'Company Logo Frame',t:'Static',c:'#1A237E',u:12},{l:'Golden Foil Border',t:'Animated',c:'#6D28D9',u:8},{l:'Congratulations',t:'Static',c:'#1A7A42',u:5},{l:'Happy Birthday',t:'GIF Overlay',c:'#C2410C',u:3},{l:'Branded Frame',t:'Static',c:'#141412',u:7},{l:'Sparkle Transition',t:'Video Overlay',c:'#0369A1',u:2},{l:'Luxury Gold',t:'Animated',c:'#B45309',u:6},{l:'Minimal White',t:'Static',c:'#475569',u:11},{l:'Neon Glow',t:'GIF Overlay',c:'#4C1D95',u:4}];
+  return wframe('super-admin.Name.com/overlays',`
+${saN('library')}
+<div class="wc">
+  <div style="margin-bottom:12px;"><span style="font-size:10px;color:var(--bl);cursor:pointer;font-family:var(--mn);" onclick="showSA('library',null)">← Library</span></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px;"><div><div class="h2">Overlays</div><div class="mu" style="margin-top:2px;">Global - available to all clients.</div></div><div style="display:flex;gap:8px;"><div class="btn bgh" style="border-radius:7px;padding:7px 11px;font-size:10px;" onclick="openOvBuilder()">+ Build</div><div class="btn" style="border-radius:7px;padding:7px 11px;font-size:10px;" onclick="openOvUpload()">↑ Upload</div></div></div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;" id="sa-lib-f">
+    ${['All','Static','Animated','GIF Overlays','Video Overlays'].map((f,i)=>`<div class="fp ${i===0?'on':''}" onclick="filterOv(this,'${f}','sa-lib-g')">${f}</div>`).join('')}
+  </div>
+  <div class="g2" id="sa-lib-g">
+    ${ovs.map(ov=>`<div data-t="${ov.t}" style="border:1.5px solid var(--bd);border-radius:10px;overflow:hidden;cursor:pointer;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--bl)'" onmouseout="this.style.borderColor='var(--bd)'">
+      <div style="height:80px;background:linear-gradient(135deg,${ov.c},${ov.c}88);position:relative;display:flex;align-items:center;justify-content:center;"><div style="font-size:9px;font-family:var(--mn);color:rgba(255,255,255,.5);">PREVIEW</div><div style="position:absolute;top:5px;right:5px;background:rgba(0,0,0,.45);border-radius:3px;padding:1px 5px;font-size:7px;font-family:var(--mn);color:#fff;">${ov.t}</div></div>
+      <div style="padding:8px 9px;background:var(--bg);"><div style="font-size:10px;font-weight:600;">${ov.l}</div><div style="font-size:8px;font-family:var(--mn);color:var(--mu);margin-top:2px;">${ov.u} events</div><div style="display:flex;gap:5px;margin-top:7px;"><div class="btn bgh" style="flex:1;border-radius:5px;padding:4px;font-size:9px;text-align:center;" onclick="event.stopPropagation();toast('Edit')">Edit</div><div class="btn bgh" style="flex:1;border-radius:5px;padding:4px;font-size:9px;text-align:center;" onclick="event.stopPropagation();toast('Duplicated')">Duplicate</div><div class="btn bgh" style="flex:1;border-radius:5px;padding:4px;font-size:9px;text-align:center;border-color:var(--re);color:var(--re);" onclick="event.stopPropagation();toast('Deleted')">Delete</div></div></div>
+    </div>`).join('')}
+  </div>
+</div>`);}
+
+function saGifTpl(){return wframe('super-admin.Name.com/gif-templates',`
+${saN('library')}
+<div class="wc">
+<div style="margin-bottom:12px;"><span style="font-size:10px;color:var(--bl);cursor:pointer;font-family:var(--mn);" onclick="showSA('library',null)">← Library</span></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px;"><div><div class="h2">GIF Templates</div><div class="mu" style="margin-top:2px;">Global - available to all clients.</div></div><div style="display:flex;gap:8px;"><div class="btn bgh" style="border-radius:7px;padding:7px 11px;font-size:10px;" onclick="openOvBuilder()">+ Build</div><div class="btn" style="border-radius:7px;padding:7px 11px;font-size:10px;" onclick="openOvUpload()">↑ Upload</div></div></div>
+  <div class="g2">
+    ${[{l:'Gala Transform',m:'Single Photo',c:'#1A237E'},{l:'Red Carpet',m:'Multi-Shot · 4 frames',c:'#6D28D9'},{l:'Corporate Reveal',m:'Single Photo',c:'#1A7A42'},{l:'Party',m:'Multi-Shot · 3 frames',c:'#C2410C'}].map(t=>`
+    <div class="card" style="cursor:pointer;" onclick="toast('Edit: ${t.l}')">
+      <div style="height:80px;background:linear-gradient(135deg,${t.c},${t.c}88);border-radius:8px;margin-bottom:10px;display:flex;align-items:center;justify-content:center;font-size:9px;font-family:var(--mn);color:rgba(255,255,255,.5);">PREVIEW</div>
+      <div style="font-size:12px;font-weight:700;">${t.l}</div><div style="font-size:9px;color:var(--mu);font-family:var(--mn);margin-top:3px;">${t.m}</div>
+      <div style="display:flex;gap:5px;margin-top:10px;"><div class="btn bgh" style="flex:1;border-radius:6px;padding:6px;font-size:9px;text-align:center;" onclick="event.stopPropagation();toast('Edit')">Edit</div><div class="btn bgh" style="flex:1;border-radius:6px;padding:6px;font-size:9px;text-align:center;" onclick="event.stopPropagation();toast('Duplicated')">Duplicate</div><div class="btn bgh" style="flex:1;border-radius:6px;padding:6px;font-size:9px;text-align:center;border-color:var(--re);color:var(--re);" onclick="event.stopPropagation();toast('Deleted')">Delete</div></div>    </div>`).join('')}
+  </div>
+</div>`);}
+
+function saAttractLib(){return wframe('super-admin.Name.com/attract',`
+${saN('library')}
+<div class="wc">
+<div style="margin-bottom:12px;"><span style="font-size:10px;color:var(--bl);cursor:pointer;font-family:var(--mn);" onclick="showSA('library',null)">← Library</span></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px;"><div><div class="h2">Attract Screens</div><div class="mu" style="margin-top:2px;">Global - available to all clients.</div></div><div style="display:flex;gap:8px;"><div class="btn bgh" style="border-radius:7px;padding:7px 11px;font-size:10px;" onclick="openOvBuilder()">+ Build</div><div class="btn" style="border-radius:7px;padding:7px 11px;font-size:10px;" onclick="openOvUpload()">↑ Upload</div></div></div>
+  <div class="g2">
+    ${[{l:'Brand Dark',t:'Still',c:'linear-gradient(135deg,#0C0E1A,#1A237E)'},{l:'Brand Light',t:'Still',c:'linear-gradient(135deg,#F4F3EF,#D8DFF5)'},{l:'Gold Particles',t:'Video',c:'linear-gradient(135deg,#B45309,#F59E0B)'},{l:'Neon Circuit',t:'Animated',c:'linear-gradient(135deg,#0C3A1E,#1A7A42)'},{l:'Minimal White',t:'Still',c:'#F4F3EF'},{l:'Deep Space',t:'Video',c:'linear-gradient(135deg,#0C0E1A,#4C1D95)'}].map(s=>`
+    <div style="border:1.5px solid var(--bd);border-radius:10px;overflow:hidden;cursor:pointer;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--bl)'" onmouseout="this.style.borderColor='var(--bd)'" onclick="toast('Edit: ${s.l}')">
+      <div style="height:80px;background:${s.c};display:flex;align-items:center;justify-content:center;position:relative;"><div style="font-size:8px;font-family:var(--mn);color:rgba(255,255,255,.4);">PREVIEW</div><div style="position:absolute;top:5px;right:5px;background:rgba(0,0,0,.4);border-radius:3px;padding:1px 5px;font-size:7px;font-family:var(--mn);color:#fff;">${s.t}</div></div>
+      <div style="padding:8px 9px;background:var(--bg);"><div style="font-size:10px;font-weight:600;">${s.l}</div>
+      <div style="display:flex;gap:5px;margin-top:10px;"><div class="btn bgh" style="flex:1;border-radius:6px;padding:6px;font-size:9px;text-align:center;" onclick="event.stopPropagation();toast('Edit')">Edit</div><div class="btn bgh" style="flex:1;border-radius:6px;padding:6px;font-size:9px;text-align:center;" onclick="event.stopPropagation();toast('Duplicated')">Duplicate</div><div class="btn bgh" style="flex:1;border-radius:6px;padding:6px;font-size:9px;text-align:center;border-color:var(--re);color:var(--re);" onclick="event.stopPropagation();toast('Deleted')">Delete</div></div></div>
+    </div>`).join('')}
+  </div>
+</div>`);}
+
+function saRoles(){return wframe('admin.NAME.com/roles',`
+${saN('roles')}
+<div class="wc">
+  <div class="h2" style="margin-bottom:4px;">Roles</div>
+  <div class="mu" style="margin-bottom:24px;">Manage platform access for Client Admins and Event Managers.</div>
+  <div class="g2">
+    <div style="background:var(--bg);border:1.5px solid var(--bd);border-radius:12px;padding:20px;cursor:pointer;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--bl)'" onmouseout="this.style.borderColor='var(--bd)'" onclick="showSA('client_admins',null)">
+      <div class="h3" style="margin-bottom:4px;">Client Admins</div>
+      <div style="font-size:10px;color:var(--mu);margin-bottom:16px;">Companies with access to the platform. Each manages their own events.</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-size:9px;font-family:var(--mn);color:var(--mu);">3 clients · 2 active</div>
+        <div style="font-size:10px;font-family:var(--mn);color:var(--bl);">Manage →</div>
+      </div>
+    </div>
+    <div style="background:var(--bg);border:1.5px solid var(--bd);border-radius:12px;padding:20px;cursor:pointer;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--bl)'" onmouseout="this.style.borderColor='var(--bd)'" onclick="showSA('event_managers',null)">
+      <div class="h3" style="margin-bottom:4px;">Event Managers</div>
+      <div style="font-size:10px;color:var(--mu);margin-bottom:16px;">Booth operators assigned to run events on the ground.</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-size:9px;font-family:var(--mn);color:var(--mu);">3 managers · 2 active</div>
+        <div style="font-size:10px;font-family:var(--mn);color:var(--bl);">Manage →</div>
+      </div>
+    </div>
+  </div>
+</div>`);}
+
+function saClientAdmins(){
+  const clients=[
+    {name:'Sarah Miller',  email:'sarah@companya.com',  company:'Company A', code:'CA2849', events:2, status:'pg', sl:'Active'},
+    {name:'Tom Baker',     email:'tom@companya.com',    company:'Company A', code:'CA2850', events:2, status:'pg', sl:'Active'},
+    {name:'James Wong',    email:'james@companyb.com',  company:'Company B', code:'CA3741', events:1, status:'pg', sl:'Active'},
+    {name:'Priya Sharma',  email:'priya@companyc.com',  company:'Company C', code:'CA5192', events:0, status:'pa', sl:'Pending'},
+    {name:'Aisha Malik',   email:'aisha@companyc.com',  company:'Company C', code:'CA5193', events:0, status:'pa', sl:'Pending'},
+  ].sort((a,b)=>a.company.localeCompare(b.company)||a.name.localeCompare(b.name));
+
+  // Group by company
+  const grouped={};
+  clients.forEach(c=>{if(!grouped[c.company])grouped[c.company]=[];grouped[c.company].push(c);});
+
+  const rows = Object.keys(grouped).sort().map(company=>`
+    <div style="margin-bottom:20px;">
+      <div style="font-size:10px;font-family:var(--mn);font-weight:500;color:var(--mu);letter-spacing:.08em;text-transform:uppercase;padding:6px 0;border-bottom:1.5px solid var(--bd);margin-bottom:10px;">${company}</div>
+      ${grouped[company].map(c=>`
+      <div style="background:var(--bg);border:1.5px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+          <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--bl),var(--gr));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0;">${c.name[0]}</div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:700;">${c.name}</div>
+            <div style="font-size:9px;color:var(--mu);font-family:var(--mn);margin-top:2px;">${c.email}</div>
+            <div style="font-size:9px;color:var(--mu);font-family:var(--mn);">${c.events} event${c.events!==1?'s':''}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
+            <span class="p ${c.status}">${c.sl}</span>
+            <div style="background:var(--bg);border:1.5px solid var(--bd);border-radius:5px;padding:2px 8px;font-size:8px;font-family:var(--mn);color:var(--mu);">CODE: ${c.code}</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:7px;border-top:1px solid var(--bd);padding-top:10px;">
+          <div class="btn bgh" style="flex:1;border-radius:6px;padding:6px;font-size:9px;text-align:center;" onclick="toast('Editing ${c.name}')">Edit</div>
+          <div class="btn bgh" style="flex:1;border-radius:6px;padding:6px;font-size:9px;text-align:center;" onclick="toast('Code regenerated')">Regen Code</div>
+          <div class="btn bgh" style="flex:1;border-radius:6px;padding:6px;font-size:9px;text-align:center;border-color:var(--re);color:var(--re);" onclick="toast('${c.name} removed')">Remove</div>
+        </div>
+      </div>`).join('')}
+    </div>`).join('');
+
+  return wframe('admin.NAME.com/roles/clients',`
+${saN('roles')}
+<div class="wc">
+  <div style="margin-bottom:14px;"><span style="font-size:10px;color:var(--bl);cursor:pointer;font-family:var(--mn);" onclick="showSA('roles',null)">← Roles</span></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+    <div><div class="h2">Client Admins</div><div class="mu" style="margin-top:2px;">Sorted by company, then name.</div></div>
+    <div class="wbtn" onclick="openAddClient()">+ Add Client</div>
+  </div>
+  <div style="position:relative;margin-bottom:20px;">
+    <input class="inp" placeholder="Search by name, email or company…" oninput="saFilterList(this.value,'ca-list','ca-item')" style="padding-left:32px;"/>
+    <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;" width="14" height="14" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="6" stroke="var(--mu)" stroke-width="1.6"/><path d="M13.5 13.5l3 3" stroke="var(--mu)" stroke-width="1.6" stroke-linecap="round"/></svg>
+  </div>
+  <div id="ca-list">
+    ${rows}
+  </div>
+</div>`);}
+
+function saEventManagers(){
+  const managers=[
+    {name:'Jordan Smith',  email:'booth@companya.com',  phone:'+971 51 234 5678', client:'Company A', code:'EM2849', events:['Company A: Annual Gala 2026'],                                              status:'pg', sl:'Active'},
+    {name:'Morgan Taylor', email:'morgan@staff.com',    phone:'+971 55 456 7890', client:'All',       code:'EM5192', events:['Company A: Annual Gala 2026','Company B: Product Launch','Company A: Corporate Dinner'], status:'pa', sl:'Pending'},
+    {name:'Riley Chen',    email:'riley@companyb.com',  phone:'+971 52 345 6789', client:'Company B', code:'EM3741', events:['Company B: Product Launch'],                                               status:'pg', sl:'Active'},
+  ].sort((a,b)=>a.name.localeCompare(b.name));
+
+  const rows = managers.map(m=>`
+  <div class="ca-item" style="background:var(--bg);border:1.5px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:10px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+      <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--bl),var(--pu));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0;">${m.name[0]}</div>
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:700;">${m.name}</div>
+        <div style="font-size:9px;color:var(--mu);font-family:var(--mn);margin-top:2px;">${m.email} · ${m.phone}</div>
+        <div style="font-size:9px;color:var(--mu);font-family:var(--mn);">Client: ${m.client}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
+        <span class="p ${m.status}">${m.sl}</span>
+        <div style="background:var(--bg);border:1.5px solid var(--bd);border-radius:5px;padding:2px 8px;font-size:8px;font-family:var(--mn);color:var(--mu);">CODE: ${m.code}</div>
+      </div>
+    </div>
+    <div style="margin-bottom:10px;">
+      <div class="lbl" style="margin-bottom:5px;">Event Access</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;">
+        ${m.events.map(ev=>`<span class="p pb">${ev}</span>`).join('')}
+        <span style="display:inline-flex;align-items:center;font-family:var(--mn);font-size:8px;padding:2px 7px;border-radius:20px;border:1px dashed var(--bd);color:var(--bl);cursor:pointer;" onclick="toast('Assign event to ${m.name}')">+ Assign</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:7px;border-top:1px solid var(--bd);padding-top:10px;">
+      <div class="btn bgh" style="flex:1;border-radius:6px;padding:6px;font-size:9px;text-align:center;" onclick="toast('Editing ${m.name}')">Edit</div>
+      <div class="btn bgh" style="flex:1;border-radius:6px;padding:6px;font-size:9px;text-align:center;" onclick="toast('Code regenerated')">Regen Code</div>
+      <div class="btn bgh" style="flex:1;border-radius:6px;padding:6px;font-size:9px;text-align:center;border-color:var(--re);color:var(--re);" onclick="toast('${m.name} removed')">Remove</div>
+    </div>
+  </div>`).join('');
+
+  return wframe('admin.NAME.com/roles/managers',`
+${saN('roles')}
+<div class="wc">
+  <div style="margin-bottom:14px;"><span style="font-size:10px;color:var(--bl);cursor:pointer;font-family:var(--mn);" onclick="showSA('roles',null)">← Roles</span></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+    <div><div class="h2">Event Managers</div><div class="mu" style="margin-top:2px;">Sorted alphabetically by name.</div></div>
+    <div class="wbtn" onclick="openAddSAManager()">+ Add</div>
+  </div>
+  <div style="position:relative;margin-bottom:20px;">
+    <input class="inp" placeholder="Search by name, email or client…" oninput="saFilterList(this.value,'em-list','ca-item')" style="padding-left:32px;"/>
+    <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;" width="14" height="14" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="6" stroke="var(--mu)" stroke-width="1.6"/><path d="M13.5 13.5l3 3" stroke="var(--mu)" stroke-width="1.6" stroke-linecap="round"/></svg>
+  </div>
+  <div id="em-list">
+    ${rows}
+  </div>
+</div>`);}
+
+function saFilterList(query, listId, itemClass){
+  const q = query.toLowerCase();
+  const list = document.getElementById(listId);
+  if(!list) return;
+  list.querySelectorAll('.'+itemClass).forEach(el=>{
+    el.style.display = el.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+function openAddClient(){openM(`<span class="mc" onclick="closeM()">×</span>
+<div style="font-size:15px;font-weight:700;margin-bottom:4px;">Add Client Admin</div>
+<div style="font-size:11px;color:var(--mu);margin-bottom:16px;">An invite code will be auto-generated. Share it with the client — they use it to sign up and access their Client Admin dashboard.</div>
+<div style="display:flex;flex-direction:column;gap:10px;">
+  <div><div class="lbl">Company Name</div><input class="inp" style="margin-top:4px;" placeholder="e.g. Company D"/></div>
+  <div><div class="lbl">Contact Email (optional)</div><input class="inp" style="margin-top:4px;" placeholder="admin@companyd.com" type="email"/></div>
+  <div style="background:var(--bll);border:1.5px solid #A5B4FC;border-radius:8px;padding:10px 12px;">
+    <div style="font-size:9px;font-family:var(--mn);color:var(--mu);margin-bottom:4px;">AUTO-GENERATED INVITE CODE</div>
+    <div style="font-size:22px;font-weight:700;font-family:var(--mn);color:var(--bl);letter-spacing:.12em;">CA${Math.floor(1000+Math.random()*9000)}</div>
+    <div style="font-size:9px;color:var(--mu);margin-top:3px;">Share this with the client to let them sign up as a Client Admin.</div>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:4px;">
+    <div class="btn bgh bfu" style="border-radius:8px;padding:10px;" onclick="closeM()">Cancel</div>
+    <div class="btn bfu" style="border-radius:8px;padding:10px;" onclick="closeM();toast('Client invite created — share the code!')">Create Invite</div>
+  </div>
+</div>`);}
+
+function openAddSAManager(){openM(`<span class="mc" onclick="closeM()">×</span>
+<div style="font-size:15px;font-weight:700;margin-bottom:4px;">Add Event Manager</div>
+<div style="font-size:11px;color:var(--mu);margin-bottom:16px;">An invite code will be auto-generated. Share it with the operator — they use it to sign up in the Event Manager app.</div>
+<div style="display:flex;flex-direction:column;gap:10px;">
+  <div><div class="lbl">Client / Company</div>
+    <select class="inp" style="margin-top:4px;cursor:pointer;">
+      <option>Company A</option><option>Company B</option><option>Company C</option><option>All Clients</option>
+    </select>
+  </div>
+  <div><div class="lbl">Assign Events (optional — can do later)</div>
+    <div style="display:flex;flex-direction:column;gap:5px;margin-top:4px;">
+      ${['Company A: Annual Gala 2026','Company B: Product Launch','Company A: Corporate Dinner'].map(ev=>`
+      <label style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg);border-radius:7px;border:1.5px solid var(--bd);cursor:pointer;font-size:11px;">
+        <input type="checkbox" style="accent-color:var(--bl);"/> ${ev}
+      </label>`).join('')}
+    </div>
+  </div>
+  <div style="background:var(--bll);border:1.5px solid #A5B4FC;border-radius:8px;padding:10px 12px;">
+    <div style="font-size:9px;font-family:var(--mn);color:var(--mu);margin-bottom:4px;">AUTO-GENERATED INVITE CODE</div>
+    <div style="font-size:22px;font-weight:700;font-family:var(--mn);color:var(--bl);letter-spacing:.12em;">EM${Math.floor(1000+Math.random()*9000)}</div>
+    <div style="font-size:9px;color:var(--mu);margin-top:3px;">Share this code with the operator to let them sign up.</div>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:4px;">
+    <div class="btn bgh bfu" style="border-radius:8px;padding:10px;" onclick="closeM()">Cancel</div>
+    <div class="btn bfu" style="border-radius:8px;padding:10px;" onclick="closeM();toast('Invite created — share the code!')">Create Invite</div>
+  </div>
+</div>`);}
+
+function saAnalytics(){
+  const photos=[{id:'GA-001',col:'#1A237E',mode:'GIF',shares:4,methods:['Email','QR'],rating:5,time:'14:32',people:2,flag:false},{id:'GA-003',col:'#C2410C',mode:'GIF',shares:10,methods:['SMS','Email','QR'],rating:5,time:'14:05',people:3,flag:true},{id:'GA-004',col:'#6D28D9',mode:'AI Transform',shares:1,methods:['WhatsApp'],rating:3,time:'13:51',people:1,flag:false}];
+  return wframe('super-admin.Name.com/analytics',`
+${saN('analytics')}
+<div class="wc">
+  <div class="h2" style="margin-bottom:4px;">Platform Analytics</div>
+  <div class="mu" style="margin-bottom:16px;">All clients · all events</div>
+  <div class="g3" style="margin-bottom:20px;">
+    ${[['2,419','Sessions'],['5,882','Shares'],['4.8★','Avg Rating']].map(([v,l])=>`<div class="card" style="text-align:center;"><div style="font-size:22px;font-weight:700;">${v}</div><div class="lbl" style="margin:4px 0 0;">${l}</div></div>`).join('')}
+  </div>
+  <div class="card" style="margin-bottom:16px;">
+    <div class="h3" style="margin-bottom:10px;">Platform-Wide Shares</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      ${[{m:'Email',n:1842,c:'var(--bl)'},{m:'QR',n:1420,c:'var(--or)'},{m:'SMS',n:1100,c:'var(--gr)'},{m:'WhatsApp',n:900,c:'#16A34A'},{m:'AirDrop',n:620,c:'var(--mu)'}].map(s=>`<div style="flex:1;min-width:60px;text-align:center;padding:10px 6px;background:var(--bg);border-radius:8px;border:1.5px solid var(--bd);"><div style="font-size:16px;font-weight:700;color:${s.c};">${s.n}</div><div style="font-size:8px;font-family:var(--mn);color:var(--mu);margin-top:2px;">${s.m}</div></div>`).join('')}
+    </div>
+  </div>
+  <div style="background:var(--rel);border:1.5px solid #FCA5A5;border-radius:9px;padding:12px 14px;margin-bottom:14px;">
+    <div style="font-size:11px;font-weight:700;color:var(--re);margin-bottom:4px;">🚩 Privacy Flag - Investigation Required</div>
+    <div style="font-size:10px;color:var(--re);">GA-003 (Company A: Annual Gala): 3 people in photo, 10 shares. Possible unauthorised distribution. Action required.</div>
+    <div class="btn bre" style="border-radius:7px;padding:7px 14px;font-size:10px;margin-top:10px;display:inline-block;" onclick="toast('Investigation raised for GA-003')">Flag for Investigation</div>
+  </div>
+  <div class="h3" style="margin-bottom:10px;">Recent Activity</div>
+  ${photos.map(p=>`
+  <div class="pr-row ${p.flag?'flag':''}" onclick="openPhotoDetail('${p.id}','${p.mode}',${p.shares},'${p.methods.join(', ')}',${p.rating},${p.people},${p.flag})">
+    <div class="thumb" style="background:${p.col};"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><rect x="2" y="4" width="16" height="12" rx="2" stroke="rgba(255,255,255,.6)" stroke-width="1.3"/><circle cx="10" cy="10" r="3" stroke="rgba(255,255,255,.6)" stroke-width="1.1"/></svg></div>${p.flag?`<div style="position:absolute;top:-2px;right:-2px;background:var(--re);border-radius:50%;width:14px;height:14px;display:flex;align-items:center;justify-content:center;font-size:8px;">🚩</div>`:''}</div>
+    <div style="flex:1;"><div style="font-size:11px;font-weight:700;">${p.id} · ${p.mode}</div><div style="font-size:9px;color:var(--mu);font-family:var(--mn);margin-top:2px;">${p.time} · ${p.shares} share${p.shares>1?'s':''} · ${p.methods.join(', ')}</div>${p.flag?`<div style="font-size:9px;color:var(--re);font-family:var(--mn);">⚠ ${p.people} people, ${p.shares} shares</div>`:''}</div>
+    <div>${stars(p.rating,11)}</div>
+  </div>`).join('')}
+</div>`);}
+
+function openPhotoDetail(id,mode,shares,methods,rating,people,flag){
+  openM(`<span class="mc" onclick="closeM()">×</span>
+  <div style="font-size:15px;font-weight:700;margin-bottom:5px;">${id} - Detail</div>
+  <div class="mu" style="margin-bottom:12px;">${mode} · ${shares} share${shares>1?'s':''}</div>
+  ${flag?`<div style="background:var(--rel);border:1.5px solid #FCA5A5;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:10px;color:var(--re);font-weight:600;">🚩 PRIVACY FLAG: ${people} people in photo, ${shares} shares.</div>`:''}
+  <div style="height:90px;background:linear-gradient(135deg,#1A237E,#283593);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;"><svg width="28" height="38" viewBox="0 0 60 80" fill="none"><circle cx="30" cy="18" r="14" stroke="rgba(255,255,255,.4)" stroke-width="1.5"/><path d="M6 76c0-13.255 10.745-24 24-24s24 10.745 24 24" stroke="rgba(255,255,255,.4)" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+  <div class="lbl" style="margin-bottom:6px;">Share breakdown</div>
+  <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:12px;">${methods.split(', ').map(m=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:var(--bg);border-radius:7px;"><span style="font-size:11px;">${m}</span><span style="font-family:var(--mn);font-size:11px;font-weight:600;">1×</span></div>`).join('')}</div>
+  <div class="lbl" style="margin-bottom:5px;">Guest feedback</div>${rating>0?stars(rating,16):`<div style="font-size:10px;color:var(--mu);font-style:italic;">No feedback submitted</div>`}
+  ${flag?`<div class="btn bre bfu" style="border-radius:8px;padding:10px;margin-top:12px;" onclick="closeM();toast('Share link revoked')">Revoke Share Link</div>`:''}
+  <div class="btn bgh bfu" style="border-radius:8px;padding:10px;margin-top:8px;" onclick="closeM()">Close</div>`);
+}
+
+/* SHARED MODALS */
+function openOvBuilder(){openM(`<span class="mc" onclick="closeM()">×</span>
+<div style="font-size:15px;font-weight:700;margin-bottom:5px;">Overlay Builder</div>
+<div style="font-size:11px;color:var(--mu);margin-bottom:14px;">Add logos, text frames and branding elements.</div>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
+  ${['📷 Logo','T Text','⭐ Sticker','▭ Frame','🎉 Celebration','🎂 Birthday'].map(t=>`<div style="padding:4px 9px;border-radius:5px;border:1.5px solid var(--bd);font-size:9px;cursor:pointer;background:var(--bg);" onclick="toast('Add: ${t}')">${t}</div>`).join('')}
+</div>
+<div style="height:150px;background:var(--bg);border:2px dashed var(--bd);border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;">
+  <div style="text-align:center;"><div style="font-size:10px;color:var(--mu);">Canvas - drag elements here</div></div>
+</div>
+<div style="display:flex;gap:8px;"><div class="btn bgh bfu" style="border-radius:8px;padding:10px;" onclick="closeM()">Cancel</div><div class="btn bfu" style="border-radius:8px;padding:10px;" onclick="closeM();toast('Overlay saved!')">Save Overlay</div></div>`);}
+
+function openOvUpload(){openM(`<span class="mc" onclick="closeM()">×</span>
+<div style="font-size:15px;font-weight:700;margin-bottom:5px;">Upload Overlay</div>
+<div class="upl" style="margin:12px 0;min-height:120px;" onclick="toast('Select file')">
+  <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 4v14M4 11h14" stroke="var(--mu)" stroke-width="1.8" stroke-linecap="round"/></svg>
+  <div style="font-size:11px;color:var(--mu);">Click to select file</div>
+  <div style="font-size:9px;font-family:var(--mn);color:var(--mu);">PNG (transparent) · GIF · MP4 · Max 20MB</div>
+</div>
+<div style="display:flex;gap:8px;"><div class="btn bgh bfu" style="border-radius:8px;padding:10px;" onclick="closeM()">Cancel</div><div class="btn bfu" style="border-radius:8px;padding:10px;" onclick="closeM();toast('Overlay uploaded!')">Upload</div></div>`);}
+
+/* Init */
+showSA('login');
+</script>
+</body>
+</html>
